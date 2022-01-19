@@ -1,0 +1,70 @@
+﻿@using WebClient.Core.Models;
+@model WebClient.Core.ViewModels.ThongKeTongQuatVM
+@{
+    ViewData["Title"] = "Trang chủ";
+    AccountInfo account = this.ViewBag.Account;
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@Model.TongSoLieuVaccine</h3>
+                        <p>Tổng số liều</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-social-buffer"></i>
+                    </div>
+                    <a href="/duan" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@Model.TongSoNguoiDangKy</h3>
+                        <p>Tổng số người đăng ký</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-folder"></i>
+                    </div>
+                    <a href="/quydattaidinhcu" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@Model.TongSoNguoiDaTiemMui1</h3>
+                        <p>Số người tiêm mũi 1</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-android-checkbox"></i>
+                    </div>
+                    <a href="/duan" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-3 col-6">
+                <!-- small box -->
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>@Model.TongSoNguoiDaTiemMui2</h3>
+                        <p>Số người tiêm mũi 2</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-ios-bookmarks"></i>
+                    </div>
+                    <a href="/quydattaidinhcu" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+        </div>
+        <!-- /.row -->
+    </div>
+</section>

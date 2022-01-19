@@ -1,0 +1,164 @@
+﻿@using WebClient.Core.Entities;
+@using System.Linq;
+@model IEnumerable<Permission>
+
+@{
+    ViewData["Title"] = "Cấp quyền nhân viên";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <input type="text" hidden id="departmentIdCurrent" value="@ViewBag.departmentIdCurrent" />
+            <div class="col-md-6">
+                <div class="card card-default card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách nhân viên</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="tree-view"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách quyền</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="card-body">
+                        <table id="tbPermission" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20px">#</th>
+                                    <th style="width: 40px"></th>
+                                    <th style="width: 80px">Mã quyền</th>
+                                    <th>Tên quyền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var count = (Model == null) ? 0 : Model.Count();
+                                    if (count > 0)
+                                    {
+                                        var i = 1;
+                                        foreach (var p in Model)
+                                        {
+                                            <tr data-id="@p.Id_Quyen">
+                                                <td>@(i++)</td>
+                                                <td><input type="checkbox" disabled /></td>
+                                                <td>@p.Ma_Quyen</td>
+                                                <td class="permission-name">@p.Ten_Quyen</td>
+                                            </tr>
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <button id="btn-save-permission" type="button" class="btn btn-primary float-right">
+                            <i class="far fa-save"></i>
+                            Lưu
+                        </button>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </div>
+        </div>
+        <form id="form-set-permission" action="/permission/SetUserPermissions" method="post" style="display: none">
+            @Html.AntiForgeryToken()
+        </form>
+    </div>
+</section>
+@section Scripts
+    {
+    <script>
+        var $treeView = $("#tree-view");
+        $treeView.jstree({
+            "core": {
+                'data': function (obj, callback) {
+                    var $this = this;
+                    GetChildrenOfDeparment(obj).done(function (data) {
+                        data.forEach(function (item, index) {
+                            if (item.typeNode == "Employee") {
+                                item.icon = "fa fa-users";
+                            } else if (item.typeNode == "Account") {
+                                item.icon = "fa fa-user";
+                            }
+                        });
+                        callback.call($this, data);
+                    });
+                }
+            }
+        }).on('changed.jstree', function (e, data) {
+            $tbPermission.find("input:checkbox:checked").prop('checked', false);
+            if (data.node.original.typeNode != "Account") {
+                $("#btn-save-permission").prop("disabled", true);
+                $tbPermission.find("input:checkbox").prop("disabled", true);
+            } else {
+                $("#btn-save-permission").prop("disabled", false);
+                $tbPermission.find("input:checkbox").prop("disabled", false);
+                // Get id permissions of a employee
+                $.ajax({
+                    url: "/permission/GetIdPermissions",
+                    method: "GET",
+                    data: {
+                        userId: data.node.id.substring(1, data.node.id.length)
+                    }
+                }).done(function (data) {
+                    if (data != null && data.length > 0) {
+                        data.forEach(function (item, index) {
+                            $tbPermission.find("tr[data-id=" + item + "] input:checkbox").prop('checked', true);
+                        });
+                    }
+                });
+            }
+        });
+
+        function GetChildrenOfDeparment(obj, callback) {
+            var departmentIdCurrent = $('#departmentIdCurrent').val();
+            if (obj.original && obj.original.typeNode == "Employee") {
+                return $.ajax({
+                    url: "/permission/GetAccountsOfEmployee",
+                    data: {
+                        idEmployee: obj.id.substring(1, obj.id.length)
+                    }
+                })
+            } else {
+                return $.ajax({
+                    url: "/permission/GetChildrenOfDeparment",
+                    method: "post",
+                    data: {
+                        idDeparment: obj.id == "#" ? departmentIdCurrent : obj.id.substring(1, obj.id.length)
+                    }
+                });
+            }
+        }
+
+        var $tbPermission = $("#tbPermission");
+        var $formSubmit = $("#form-set-permission");
+        $("#btn-save-permission").click(function () {
+            let $firstInput = $formSubmit.find("input[name='__RequestVerificationToken']");
+            $formSubmit.children().remove();
+            $formSubmit.append($firstInput);
+
+            var selectedNodes = $treeView.jstree("get_selected", true);
+            var idUser = 0;
+            if (selectedNodes.length == 0 || selectedNodes[0].original.typeNode != "Account") {
+                return;
+            }
+
+            idUser = selectedNodes[0].id.substring(1, selectedNodes[0].id.length);
+
+            $formSubmit.append("<input name='iduser' value=" + idUser + ">");
+            $tbPermission.find("input:checkbox:checked").each(function (index, e) {
+                var id = $(e).closest("tr").data("id");
+                $formSubmit.append("<input name='permissionIds[" + index + "]' value=" + id + ">");
+            });
+
+            $formSubmit.submit();
+        });
+
+    </script>
+}

@@ -1,0 +1,73 @@
+﻿.mark-enviroment-sys {
+    position: fixed;
+    background-color: #800;
+    width: 200px;
+    text-align: center;
+    color: #fff;
+    font-weight: 700;
+    transform: rotate( -45deg );
+    top: 28px;
+    left: -64px;
+    z-index: 9999;
+}
+
+.navbar-nav > .user-menu > .dropdown-menu > .user-header {
+    padding: 10px;
+    text-align: center;
+}
+
+.inputDisplay {
+    border: none;
+    border-bottom: 0.5px dotted;
+    width: 100%;
+}
+.nav-treeview .nav-icon {
+    visibility: hidden;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.menu-is-opening li.nav-item:before, .menu-open li.nav-item:before {
+    background: #ffffff91;
+    bottom: auto;
+    content: "";
+    height: 8px;
+    left: 20px;
+    margin-top: 15px;
+    position: absolute;
+    width: 8px;
+    border-radius: 50%;
+}
+
+
+.menu-is-opening li.nav-item:after, .menu-open li.nav-item:after {
+    border-left: 1px solid #ffffff91;
+    bottom: 0;
+    content: "";
+    left: 23px;
+    position: absolute;
+    top: 0;
+}
+
+.menu-is-opening li.nav-item:last-child::after, .menu-open li.nav-item:last-child::after {
+    bottom: 50%;
+}
+
+td.details-control {
+    background: url('../dist/img/details_open.png') no-repeat center center;
+    cursor: pointer;
+}
+
+tr.shown td.details-control {
+    background: url('../dist/img/details_close.png') no-repeat center center;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #428BCA;
+}
+
+.custom-radio{
+    margin-left: 15px;
+}

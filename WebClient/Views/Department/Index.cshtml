@@ -1,0 +1,279 @@
+﻿@model IEnumerable<Department>
+@{
+    ViewData["Title"] = "Đơn vị";
+}
+@functions{
+    string RenderDepartment(Department department)
+    {
+        var htmlstring = "<li data-idDV='{0}' data-tenDV='{1}'data-diaChi='{2}'data-mst='{3}' " +
+                "data-dienThoai='{4}' data-web='{5}' data-tenNguoiDaiDien='{6}'" +
+                " data-loaiDV='{7}' data-idDVCha='{8}' data-maDV='{9}' data-idDVCha='{10}'" +
+                " data-capDV='{11}' data-ghichu='{12}'>{1}";
+        htmlstring = string.Format(htmlstring, department.Id_DonVi, department.Ten_DonVi, department.Dia_Chi, department.MaSoThue,
+            department.Dien_Thoai, department.Website, department.TenNguoi_DaiDien, department.Loai_DonVi, department.Id_DV_Cha, department.Ma_DonVi,
+            department.Id_DV_Cha, department.Cap_DonVi, department.Ghi_Chu);
+        if (department.Children != null && department.Children.Count() > 0)
+        {
+            htmlstring += "<ul>";
+            foreach (var i in department.Children)
+            {
+                htmlstring += RenderDepartment(i);
+            }
+            htmlstring += "</ul>";
+        }
+
+        htmlstring += "</li>";
+
+        return htmlstring;
+    }
+
+    string RenderDepartmentOptions(IEnumerable<Department> departments, string prefix)
+    {
+        var htmlString = "";
+        foreach (var department in departments)
+        {
+            htmlString += string.Format("<option value='{2}'>{1}{0}</option>", department.Ten_DonVi, prefix, department.Id_DonVi);
+            if (department.Children != null)
+            {
+                htmlString += RenderDepartmentOptions(department.Children, prefix + "----");
+            }
+        }
+
+        return htmlString;
+    }
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách đơn vị</h3>
+                        <div class="card-tools">
+                            <button id="btn-test" type="button" class="btn btn-primary btn-tool" data-toggle="modal" data-target="#modal-detail"><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var count = (Model == null) ? 0 : Model.Count();
+                            if (count == 0)
+                            {
+                                <span>Không có dữ liệu</span>
+                            }
+                            else
+                            {
+                                <div class="row">
+                                    <div id="tree-units" class="col-md-6" style="display:none">
+                                    <ul>
+                                        @foreach (var i in Model)
+                                        {
+                                            @Html.Raw(RenderDepartment(i));
+                                        }
+                                    </ul>
+                                </div>
+                                <div></div>
+                                <div class="col-md-6" style="min-height: 350px;border-left: 1px solid gray;">
+                                    <div class="form-horizontal" id="formUnit">
+                                        <div class="">
+                                            <input type="hidden" name="Id_DonVi" id="idDonVi" />
+                                            <input type="hidden" name="Id_DV_Cha" id="idDVCha">
+                                            <div class="form-group row">
+                                                <label for="madonvi" class="col-sm-3 col-form-label">Mã Đơn vị</label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="maDonVi" name="Ma_DonVi" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="tendonvi" class="col-sm-3 col-form-label">Tên đơn vị</label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="tenDonVi" name="Ten_DonVi" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="tennguoidaidien" class="col-sm-3 col-form-label">Người đại diện</label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="tenNguoiDaiDien" name="TenNguoi_Daidien" readonly>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- /.box-body -->
+                                        <div class="">
+                                            <button id="btn-delete" disabled type="button" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times"></i>
+                                                Xóa
+                                            </button>
+                                            <a id="detail" class="btn btn-success btn-sm float-right" disabled>Xem chi tiết</a>
+                                        </div>
+                                        <!-- /.box-footer -->
+                                    </div>
+                                </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*modal detail*@
+    <div class="modal fade" id="modal-detail">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">THÊM MỚI ĐƠN VỊ</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" validate="true" show-loader="true" method="post" asp-action="SaveDepartment" asp-controller="department">
+                        @Html.AntiForgeryToken()
+                        <div class="">
+                            <input type="hidden" name="id_DonVi" id="dIdDonVi" value="0" />
+                            <input id="loaiDonVi" name="Loai_DonVi" hidden value="0">
+                            <input id="capDonVi" name="Cap_DonVi" hidden value="0">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="dMaDonVi">Mã đơn vị: <span class="text-red">*</span></label>
+                                        <input class="form-control" type="text" id="dMaDonVi" name="Ma_DonVi" required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="tendonvi">Tên đơn vị <span class="text-red">*</span></label>
+                                        <input type="text" class="form-control" id="dTenDonVi" name="Ten_DonVi" placeholder="Tên đơn vị" required maxlength="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="donvicha">Đơn vị cha</label>
+                                        <select id="Id_DV_Cha" name="Id_DV_Cha" class="form-control">
+                                            @Html.Raw(RenderDepartmentOptions(Model, ""));
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="dienthoai">Điện thoại <span class="text-red">*</span></label>
+                                        <input type="text" class="form-control" id="dienThoai" name="Dien_Thoai" placeholder="Số điện thoại" maxlength="15" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="tennguoidaidien">Đại diện <span class="text-red">*</span></label>
+                                        <input type="text" class="form-control" id="dTenNguoiDaiDien" name="TenNguoi_Daidien" placeholder="Tên người đại diện" maxlength="50" required>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="diachi">Địa chỉ <span class="text-red">*</span></label>
+                                        <input type="text" class="form-control" id="diaChi" name="Dia_Chi" placeholder="Địa chỉ" required maxlength="200">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="masothue" title="Mã số thuế">MST: <span class="text-red">*</span></label>
+                                        <input type="text" class="form-control" id="maSoThue" name="MaSoThue" placeholder="Mã số thuế" required maxlength="40">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label for="website">Website</label>
+                                        <input type="text" class="form-control" id="website" name="Website" placeholder="Website" maxlength="100">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="form-group">
+                                        <label for="ghichu">Ghi chú</label>
+                                        <textarea type="text" class="form-control" id="ghiChu" name="Ghi_Chu" placeholder="Ghi chú"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer">
+                            <button type="button" class="btn btn-default float-left" data-dismiss="modal">Đóng</button>
+                            <button id="btn-submit" type="submit" class="btn btn-primary float-right">Thêm mới</button>
+                        </div>
+                        <!-- /.box-footer -->
+                    </form>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <form id="form-delete" style="display: none!important" action="/Department/Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input name="idDonVi"/>
+    </form>
+</section>
+@section Scripts {
+    @*<script src="~/plugins/jsTree/jstree.min.js"></script>*@
+    <script type="text/javascript">
+        var $treeUnits = $("#tree-units");
+        $treeUnits.jstree({
+            "core": {
+                "multiple": false,
+                "check_callback": function (event, b, c, d) {
+                    return event != "edit";
+                }
+            },
+            "plugins": ["conditionalselect"]
+        }).on('changed.jstree', function (e, data) {
+            var d = data.node.data;
+            var parentNode;
+            var $formUnit = $("#formUnit");
+
+            if (data.node.parent != "#") {
+                parentNode = $treeUnits.jstree(true).get_node(data.node.parent);
+            }
+            if (parentNode) {
+                $formUnit.find("#idDVCha").val(parentNode.data.id);
+            } else {
+                $formUnit.find("#idDVCha").val(0);
+            }
+
+            $formUnit.find("#idDonVi").val(d.iddv);
+            $formUnit.find("#idDVCha").val(0);
+            $formUnit.find("#maDonVi").val(d.madv);
+            $formUnit.find("#tenDonVi").val(d.tendv);
+            $formUnit.find("#tenNguoiDaiDien").val(d.tennguoidaidien);
+            $formUnit.find("#btn-delete").prop('disabled', false);
+            $("#detail").attr("disabled", false);
+            $formUnit.find("#detail").attr('href', '/department/detail?idDonVi=' + d.iddv);
+            //$formUnit.find("#btn-detail").attr('href', '/department/detaildepartment?id_DonVi=' + d.iddv);
+        });
+        $treeUnits.show();
+
+        $("#btn-delete").click(function () {
+            modalHelper.showModal({
+                title: "Xóa đơn vị",
+                body: "Bạn có muốn xóa đơn vị <strong>" + $("#tenDonVi").val() + "</strong> không?",
+                buttons: {
+                    submit: "Đồng ý",
+                    close: "Đóng"
+                },
+                submit: function () {
+                    showLoading();
+                    var id = $("#formUnit #idDonVi").val();
+                    var $form = $("#form-delete");
+                    $form.find("input[name='idDonVi']").val(id);
+                    $form.submit();
+                },
+            });
+        });
+    </script>
+}

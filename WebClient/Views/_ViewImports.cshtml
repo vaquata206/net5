@@ -1,0 +1,12 @@
+﻿@using WebClient
+@using WebClient.Core.Models
+@using WebClient.Core.Entities
+@using WebClient.Core.ViewModels
+@using WebClient.Core.Helpers
+@inject WebClient.Contexts.IContextFactory contextFactory;
+@inject WebClient.Core.AppSetting AppSetting;
+@{
+    var BaseContext = contextFactory.GetInstance();
+
+}
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

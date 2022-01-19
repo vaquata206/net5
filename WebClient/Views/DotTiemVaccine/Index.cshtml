@@ -1,0 +1,283 @@
+﻿@using WebClient.Core.Models;
+@{
+    ViewData["Title"] = "Danh sách đợt tiêm vaccine";
+    int departmentId = this.ViewBag.DepartmentId;
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div id="search_panel" class="card card-default">
+            <div class="card-header">
+                <h3 class="card-title">Tìm kiếm</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form-horizontal">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Tên đợt tiêm:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" class="form-control" name="TenDotTiem" placeholder="Tên đợt tiêm">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Ngày tiêm: </label>
+                                <div class="input-group col-sm-9">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="far fa-calendar-alt"></i>
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control datepicker" id="datepicker1" placeholder="Ngày tiêm" name="NgayTiem">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Trạng thái:</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" name="TrangThai">
+                                        <option value="0">--Tất cả--</option>
+                                        <option value="1">Kết thúc đăng ký</option>
+                                        <option value="2">Đang mở đăng ký</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Tình trạng: </label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" name="TinhTrang">
+                                        <option value="0">--Tất cả--</option>
+                                        <option value="1">Chưa đăng ký đầy đủ</option>
+                                        <option value="2">Đã đăng ký đầy đủ</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <button id="btn-search" class="float-right btn btn-default"><i class="fas fa-search"></i> Tìm kiếm</button>
+            </div>
+        </div>
+        </div>
+        <div class="card card-primary card-outline">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách</h3>
+                <div class="card-tools">
+                    @{
+                        if (departmentId == 1)
+                        {
+                            <a class="btn btn-sm btn-success" href="/DotTiemVaccine/chitiet">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        }
+                    }
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="tbl-dat" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên đợt tiêm</th>
+                            <th>Ngày tiêm</th>
+                            <th>Hạn cuối</th>
+                            <th>Đã tiêm/Đăng ký</th>
+                            <th>Trạng thái</th>
+                            <th>Tình trạng</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+</section>
+@section Scripts {
+    <script>
+        //Date picker
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true
+        });
+        $(function () {
+            var tablePanel = function () {
+                var $panel = $("#tbl-dat");
+                var dataTable;
+                function init() {
+                    dataTable = $panel.DataTable({
+                        'paging': true,
+                        "responsive": true,
+                        'lengthChange': true,
+                        'searching': false,
+                        'ordering': false,
+                        'info': true,
+                        'autoWidth': false,
+                        "processing": true, // for show progress bar
+                        "oLanguage": DataTable.language,
+                        "serverSide": true,
+                        "ajax": {
+                            "url": "/DotTiemVaccine/search",
+                            "type": "POST",
+                            "data": function (d) {
+                                d.Filter = searchPanel.get();
+                            }
+                        },
+                        "columns": [
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    return meta.settings._iDisplayStart + meta.row + 1 || "";
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    return full.ten_KeHoach || "";
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    var todate = new Date(full.ngayTiem_BatDau);
+                                    var dd = ('0' + todate.getDate()).slice(-2);
+                                    var mm = ('0' + (todate.getMonth() + 1)).slice(-2); //January is 0!
+                                    var yyyy = todate.getFullYear();
+                                    todate = new Date(full.ngayTiem_KetThuc);
+                                    var dd1 = ('0' + todate.getDate()).slice(-2);
+                                    var mm1 = ('0' + (todate.getMonth() + 1)).slice(-2); //January is 0!
+                                    var yyyy1 = todate.getFullYear();
+
+                                    return dd + "/" + mm + "/" + yyyy + " - " + dd1 + "/" + mm1 + "/" + yyyy1;
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    return dateTimeHelper.dateToString(full.hanCuoi_DangKy);
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    return full.soLuong_DaTiem + "/" + full.soLuong_DangKy || "";
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    var html = "";
+                                    switch (full.trang_Thai) {
+                                        case 0:
+                                            html = '<span class="badge badge-danger">Kết thúc đăng ký</span>';
+                                            break;
+                                        case 1:
+                                            html = '<span class="badge badge-success ">Đang mở đăng ký</span>';
+                                            break;
+                                        default:
+                                            html = '<span class="badge badge-secondary">Không xác định</span>'
+                                    }
+
+                                    return html;
+                                }
+                            },
+                            {
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    var html = "";
+                                    switch (full.tinhTrang_DangKy) {
+                                        case 0:
+                                            html = '<span class="badge badge-danger">Chưa hoàn thành</span>';
+                                            break;
+                                        case 1:
+                                            html = '<span class="badge badge-success">Hoàn thành</span>';
+                                            break;
+                                        default:
+                                            html = '<span class="badge badge-secondary">Không xác định</span>'
+                                    }
+
+                                    return html;
+                                }
+                            },
+                            { 
+                                "data": null,
+                                "render": function (data, type, full, meta) {
+                                    var btn = '<a class="btn btn-success btn-sm" href="/dottiemvaccine/chitiet/' + full.id_DotTiem + '"><i class="fas fa-eye"></i> Chi tiết</a>';
+                                    if (full.id_Cha > 0 && full.trang_Thai === 1) {
+                                        btn += '<a style="margin-left: 5px" class="btn btn-success btn-sm" href="/dottiemvaccine/dangky/' + full.id_DotTiem + '"><i class="fas fa-list-ul"></i> Đăng ký</a>'
+                                    }
+
+                                    if (full.id_Cha === 0 || full.trang_Thai === 0) {
+                                        btn += '<a style="margin-left: 5px" class="btn btn-success btn-sm" href="/dottiemvaccine/xem/' + full.id_DotTiem + '"><i class="fas fa-list-ul"></i> Danh sách</a>'
+                                    }
+
+                                    return btn;
+                                }
+                            }
+                        ]
+                    });
+                }
+                function reload() {
+                    dataTable.ajax.reload();
+                }
+
+                var publicInterfaces = {
+                    init: init,
+                    reload: reload
+                };
+
+                return publicInterfaces;
+            }();
+
+            var searchPanel = function () {
+                var $panel = $("#search_panel");
+                function get() {
+                    var data = {};
+                    let $inpts = $panel.find("[name]");
+                    for (let i = 0; i < $inpts.length; i++) {
+                        let $ip = $inpts.eq(i);
+                        let key = $ip.attr("name");
+                        if (key) {
+                            data[key] = $ip.val();
+                        }
+                    }
+                    return data
+                }
+                function init() {
+                    $panel.find("#btn-search").click(function () {
+                        tablePanel.reload();
+                    });
+                    $panel.find("select").select2({
+                        theme: 'bootstrap4'
+                    });
+                }
+
+                var publicInterfaces = {
+                    get: get,
+                    init: init
+                };
+
+                return publicInterfaces;
+            }();
+
+            // init
+            tablePanel.init()
+            searchPanel.init();
+        });
+    </script>
+}

@@ -1,0 +1,278 @@
+﻿@using WebClient.Core.Entities;
+@model IEnumerable<Feature>;
+
+@{
+    ViewData["Title"] = "Chức năng";
+}
+
+@functions {
+
+    string RenderFeature(Feature feature)
+    {
+        var htmlstring = "<li data-id='{0}' data-name='{1}' data-dst='{2}' data-tip='{3}' data-ctr='{4}' data-act='{5}' data-pr='{6}' data-htm='{7}'>{1}";
+        htmlstring = string.Format(htmlstring, feature.Id_ChucNang, feature.Ten_ChucNang, feature.MoTa_ChucNang, feature.Tooltip, feature.Controller_Name, feature.Action_Name, feature.Id_ChucNang_Cha, feature.HienThi_Menu);
+        if (feature.Children != null && feature.Children.Count() > 0)
+        {
+            htmlstring += "<ul>";
+            foreach (var i in feature.Children)
+            {
+                htmlstring += RenderFeature(i);
+            }
+            htmlstring += "</ul>";
+        }
+        htmlstring += "</li>";
+
+        return htmlstring;
+    }
+
+    string RenderOptionFeature(Feature feature, string prefix)
+    {
+        var htmlstring = "<option value={0} data-id='{0}' data-name='{1}' data-dst='{2}' data-tip='{3}' data-ctr='{4}' data-act='{5}' data-pr='{6}' data-htm='{7}'>{8}{1}</option>";
+        htmlstring = string.Format(htmlstring, feature.Id_ChucNang, feature.Ten_ChucNang, feature.MoTa_ChucNang, feature.Tooltip, feature.Controller_Name, feature.Action_Name, feature.Id_ChucNang_Cha, feature.HienThi_Menu, prefix);
+        if (feature.Children != null && feature.Children.Count() > 0)
+        {
+            foreach (var i in feature.Children)
+            {
+                htmlstring += RenderOptionFeature(i, "--" + prefix);
+            }
+        }
+
+        return htmlstring;
+    }
+}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card card-default">
+
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách chức năng</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-primary btn-sm" id="btn-add-feature">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row">
+                        @{
+                            var count = (Model == null) ? 0 : Model.Count();
+                            <div  class="col-md-6" style="min-height: 400px; border-right: 1px solid silver">
+                                <div id="@(count > 0?"tree-features":"")">
+                                    @{
+                                    if (count == 0)
+                                    {
+                                        <span>Không có dữ liệu</span>
+                                    }
+                                    else
+                                    {
+                                        <ul>
+                                            @foreach (var i in Model)
+                                            {
+                                                @Html.Raw(RenderFeature(i));
+                                            }
+                                        </ul>
+                                    }
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <form class="form-horizontal" id="formFeature" validate="true" method="post" action="/Feature/SaveFeature">
+                                    @Html.AntiForgeryToken()
+                                    <div class="">
+                                        <input type="hidden" name="ID_CN" id="idFeature" />
+                                        <div class="form-group">
+                                            <label>Chức năng cha</label>
+                                            <select class="form-control" name="ID_CN_PR">
+                                                <option value="0">--Không có--</option>
+                                                @foreach (var i in Model)
+                                                {
+                                                    @Html.Raw(RenderOptionFeature(i, ""));
+                                                }
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tên</label>
+                                            <input type="text" class="form-control" id="featureName" name="Ten_CN" placeholder="Tên chức năng" required maxlength="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Mô tả</label>
+                                            <input type="text" class="form-control" id="tooltip" name="ToolTip_CN" placeholder="Mô tả" maxlength="255">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Chi tiết</label>
+                                            <input type="text" class="form-control" id="description" name="Mota_CN" placeholder="Chi tiết" max-length="500">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tên Controller</label>
+                                            <input type="text" class="form-control" id="controllerName" name="Controller_Name" placeholder="Tên Controller" maxlength="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Tên Action</label>
+                                            <input type="text" class="form-control" id="action_name" name="Action_Name" placeholder="Tên Action" maxlength="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="col-sm-9 col-lg-offset-3">
+                                                <input type="checkbox" id="show-menu" name="HienThi_Menu" value="true" /> Hiển thị trên menu
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.box-body -->
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <button id="btn-delete" disabled type="button" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times"></i>
+                                                Xóa
+                                            </button>
+                                            <button type="submit" class="btn btn-primary btn-sm float-right">
+                                                <i class="far fa-save"></i>
+                                                Lưu
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- /.box-footer -->
+                                </form>
+                            </div>
+                        }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts{
+    <script>
+        $(function () {
+            var $treeFeatures = $("#tree-features");
+            var $formFeature = $("#formFeature");
+            $treeFeatures.jstree({
+                "core": {
+                    "multiple": false,
+                    "check_callback": function (event, b, c, d) {
+                        return event != "edit";
+                    }
+                }
+            }).on('changed.jstree', function (e, data) {
+                var d = data.node.data;
+
+                var parentNode;
+
+                if (data.node.parent != "#") {
+                    parentNode = $treeFeatures.jstree(true).get_node(data.node.parent);
+                }
+
+                var parentId = parentNode ? parentNode.data.id : 0;
+
+                $formFeature.find("[name='ID_CN_PR']").val(parentId)
+
+                $formFeature.find("#idFeature").val(d.id);
+                $formFeature.find("#featureName").val(d.name);
+                $formFeature.find("#tooltip").val(d.tip);
+                $formFeature.find("#description").val(d.dst);
+                $formFeature.find("#controllerName").val(d.ctr);
+                $formFeature.find("#action_name").val(d.act);
+                $formFeature.find("#show-menu").prop('checked', d.htm === 1);
+                $formFeature.find("#btn-delete").prop('disabled', false)
+            });
+            $treeFeatures.show();
+            $(document).on('dnd_stop.vakata', function (e, data) {
+                if (data.data.nodes == null || !data.data.nodes.length) {
+                    return;
+                }
+
+                var node = $treeFeatures.jstree(true).get_node(data.data.nodes[0]);
+
+                var parentNode = $treeFeatures.jstree(true).get_node(node.parent);
+                var parentId = null;
+
+                if (parentNode.data) {
+                    parentId = parentNode.data.id;
+                }
+                var order = parentNode.children.indexOf(node.id) + 1;
+
+                if (((parentId || 0) == (node.data.pr || 0)) && (node.data.stt == order)) {
+                    // There is not any change
+                    return;
+                }
+
+                $.ajax({
+                    url: "/feature/ChangePosition",
+                    method: "POST",
+                    data: {
+                        parentId: parentId,
+                        order: order,
+                        featureId: node.data.id
+                    }
+                }).done(function () {
+                    location.reload();
+                });
+            });
+
+            $("#btn-delete").click(function () {
+                var modal = {
+                    title: "Xóa chức năng",
+                    body: "Bạn có muốn xóa chức năng này không?",
+                    buttons: {
+                        submit: "Đồng ý",
+                        close: "Đóng"
+                    },
+                    submit: function () {
+                        var id = $("#formFeature #idFeature").val();
+                        showLoading();
+                        $.ajax({
+                            url: "/feature/Delete",
+                            method: "DELETE",
+                            data: {
+                                featureId: id
+                            }
+                        }).done(function () {
+                            var node = $treeFeatures.jstree("get_selected", true);
+                            $treeFeatures.jstree("delete_node", node);
+                            location.reload();
+                            var alertOption = {
+                                title: "Xóa thành công",
+                                type: alertHelper.AlertTypes.Success,
+                            };
+                            alertHelper.showAlert(alertOption)
+                        }).fail(function (data) {
+                            var alertOption = {
+                                title: "Xóa không thành công",
+                                type: alertHelper.AlertTypes.Error,
+                            };
+                            alertHelper.showAlert(alertOption)
+                        }).always(function () {
+                            hideLoading();
+                        });
+                    }
+                };
+                modalHelper.showModal(modal);
+            });
+
+            // Add feature
+            $("#btn-add-feature").click(function () {
+                var selectedNode = $treeFeatures.jstree("get_selected", true);
+                var idParent = 0;
+                if (selectedNode.length > 0) {
+                    selectedNode = selectedNode[0];
+                    idParent = selectedNode.data.id;
+                    nameParent = selectedNode.data.name;
+                }
+
+                $formFeature.find("[name='ID_CN_PR']").val(idParent)
+
+                $formFeature.find("#idFeature").val(0);
+                $formFeature.find("#featureName").val("");
+                $formFeature.find("#tooltip").val("");
+                $formFeature.find("#description").val("");
+                $formFeature.find("#controllerName").val("");
+                $formFeature.find("#action_name").val("");
+                $formFeature.find("#show-menu").prop('checked', true);
+            });
+
+            $("#btn-add-feature").trigger("click");
+        });</script>
+}

@@ -1,0 +1,356 @@
+﻿@using WebClient.Core.Entities;
+@using System.Linq;
+@model IEnumerable<WebClient.Core.Entities.Department>
+
+@{
+    ViewData["Title"] = "Phân quyền";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string RenderDepartment(Department department)
+    {
+        var htmlstring = "<li id='{0}' data-idDV='{0}' data-tenDV='{1}'data-diaChi='{2}'data-mst='{3}' " +
+                "data-dienThoai='{4}' data-web='{5}' data-tenNguoiDaiDien='{6}'" +
+                " data-loaiDV='{7}' data-idDVCha='{8}' data-maDV='{9}' data-idDVCha='{10}'" +
+                " data-capDV='{11}' data-ghichu='{12}'>{1}";
+        htmlstring = string.Format(htmlstring, department.Id_DonVi, department.Ten_DonVi, department.Dia_Chi, department.MaSoThue,
+            department.Dien_Thoai, department.Website, department.TenNguoi_DaiDien, department.Loai_DonVi, department.Id_DV_Cha, department.Ma_DonVi,
+            department.Id_DV_Cha, department.Cap_DonVi, department.Ghi_Chu);
+        if (department.Children != null && department.Children.Count() > 0)
+        {
+            htmlstring += "<ul>";
+            foreach (var i in department.Children)
+            {
+                htmlstring += RenderDepartment(i);
+            }
+            htmlstring += "</ul>";
+        }
+
+        htmlstring += "</li>";
+
+        return htmlstring;
+    }
+}
+<section class="content">
+    <div class="row">
+        <input type="text" hidden id="departmentIdCurrent" value="@ViewBag.departmentIdCurrent" />
+        <input type="hidden" id="controlledDepartments" value="@string.Join(",", ViewBag.departmentIds)" />
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Đơn vị</h3>
+                </div>
+                <div class="box-body">
+                    <div id="tree-view"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Đơn vị chuyên quản</h3>
+                    <div class="pull-right box-tools">
+                        <button class="btn btn-primary btn-sm" id="btn-save" disabled>
+                            <i class="fa fa-floppy-o"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body" id="dvcq-box">
+                    <div id="tv-dvcq">
+                        <ul>
+                            @foreach (var i in Model)
+                            {
+                                @Html.Raw(RenderDepartment(i));
+                            }
+                        </ul>
+                    </div>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+    </div>
+    <form id="form-set-permission" action="/permission/SetUserPermissions" method="post" style="display: none"></form>
+</section>
+
+@section Scripts{
+    <style rel="stylesheet" href="/lib/dropdown-tree/dropdowntree.css"></style>
+    <script src="/lib/dropdown-tree/dropdowntree.js" type="text/javascript"></script>
+
+    <script>$(function () {
+            var department = function () {
+                var $treeView = $("#tree-view");
+                var $departmentId = $("#departmentIdCurrent");
+                $treeView.jstree({
+                    "core": {
+                        'data': function (obj, callback) {
+                            var $this = this;
+                            GetChildrenOfDeparment(obj).done(function (data) {
+                                data.forEach(function (item, index) {
+                                    if (item.typeNode === "Employee") {
+                                        item.icon = "jstree-file-icon";
+                                        item.departmentId = obj.id === "#" ? $departmentId.val() : obj.id.substring(1);
+                                    } else if (item.typeNode === "Account") {
+                                        item.icon = false;
+                                        item.departmentId = obj.original.departmentId;
+                                    }
+                                });
+                                callback.call($this, data);
+                            });
+                        }
+                    }
+                }).on('changed.jstree', function (e, data) {
+                    dvcq.DisableAndUncheckAll();
+                    if (data.node.original.typeNode === "Account") {
+                        dvcq.ShowDVCQ(data);
+                    }
+
+                    return false;
+                });
+
+                function GetChildrenOfDeparment(obj, callback) {
+                    var departmentIdCurrent = $departmentId.val();
+                    if (obj.original && obj.original.typeNode == "Employee") {
+                        return $.ajax({
+                            url: "/permission/GetAccountsOfEmployee",
+                            data: {
+                                idEmployee: obj.id.substring(1, obj.id.length)
+                            }
+                        })
+                    } else {
+                        return $.ajax({
+                            url: "/permission/GetChildrenOfDeparment",
+                            method: "post",
+                            data: {
+                                idDeparment: obj.id == "#" ? departmentIdCurrent : obj.id.substring(1, obj.id.length)
+                            }
+                        });
+                    }
+                }
+            }();
+
+            var dvcq = function () {
+                var controls = {
+                    $treeView: $("#tv-dvcq"),
+                    $dBox: $("#dvcq-box"),
+                    $btnSave: $("#btn-save")
+                };
+
+                var enabledIds = $("#controlledDepartments").val().split(",");
+
+                function Init() {
+                    controls.$treeView.jstree({
+                        "checkbox": {
+                            "keep_selected_style": false,
+                            "three_state": false,
+                            // "tie_selection": false
+                            // "cascade": "undetermined"
+                        },
+                        "plugins": ["checkbox"],
+                        "core": {
+                            'check_callback': function (operation, node, node_parent, node_position, more) {
+                                return false;
+                            }
+                        }
+                    }).on('ready.jstree', function (e, data) {
+                        DisableAndUncheckAll();
+                    }).on('changed.jstree', function (e, data) {
+                        controls.$btnSave.prop('disabled', false);
+                        if (data.node) {
+                            if (data.node.state.selected && !data.node.state.disabled) {
+                                CheckNode(data.node.parent);
+                            } else if (!data.node.state.selected) {
+                                data.node.children.forEach(function (item) {
+                                    controls.$treeView.jstree().deselect_node(item);
+                                });
+                            }
+                        }
+                    });
+
+                    controls.$btnSave.click(function () {
+                        var account = controls.$dBox.data("account");
+                        if (account) {
+                            showConfirmModal({
+                                title: "Đơn vị chuyên quản",
+                                message: "Bạn có muốn lưu các đơn vị chuyên quản đối với tài khoản <strong>" + account.text + "</strong> không?",
+                                buttons: {
+                                    submit: "Lưu",
+                                    close: "Không"
+                                },
+                                submit: function () {
+                                    SaveDepartments();
+                                }
+                            })
+                        }
+                    });
+                }
+
+                function SaveDepartments() {
+                    var account = controls.$dBox.data("account");
+                    if (!account) {
+                        return;
+                    }
+
+                    var ids = GetCheckedIds();
+                    showLoading();
+                    $.ajax({
+                        url: "/permission/setdepartments",
+                        method: "post",
+                        data: {
+                            accountId: account.id.substring(1),
+                            departmentIds: ids
+                        }
+                    }).done(function () {
+                        showAlert(AlertTypes.SUCCESS, "Cấp đơn vị chuyên quản cho tài khoản " + account.text + " thành công");
+                    }).fail(function (ex) {
+                        showAlert(AlertTypes.ERROR, ex.responseText);
+                    }).always(function () {
+                        hideLoading();
+                    });
+                }
+
+                function DisableAndUncheckAll() {
+                    if (controls.$treeView.length === 0) return;
+                    controls.$treeView.jstree("deselect_all");
+
+                    var nodes = controls.$treeView.jstree(true).get_json('#', { flat: true });
+                    if ((nodes || []).length === 0) {
+                        return;
+                    }
+
+                    nodes.forEach(function (item, index) {
+                        controls.$treeView.jstree().disable_node(item);
+                    });
+                }
+
+                function BinData() {
+                    var account = controls.$dBox.data("account");
+                    EnableAvailabledNodes();
+                    if (account) {
+                        CheckNodes(account.departments);
+                        CheckNode(account.departmentId);
+                    }
+                    isEdit = false;
+                    controls.$btnSave.prop("disabled", true);
+                }
+
+                function CheckNodes(ids) {
+                    ids.forEach(function (item, index) {
+                        CheckNode(item);
+                    });
+                }
+
+                function CheckNode(id) {
+                    if (findNodeById(id)) {
+                        controls.$treeView.jstree().check_node(id);
+                        controls.$treeView.jstree()._open_to(id);
+                    }
+                }
+
+                function EnableAvailabledNodes() {
+                    var ids = GetAvailabledNodeIds();
+                    ids.forEach(function (item) {
+                        controls.$treeView.jstree().enable_node(item);
+                    });
+                }
+
+                function GetAvailabledNodeIds() {
+                    var account = controls.$dBox.data("account");
+                    var ids = [];
+                    if (account) {
+                        var currentNode = controls.$treeView.jstree().get_node(account.departmentId);
+                        ids = intersect_arrays(enabledIds, currentNode.children_d || []);
+                    }
+
+                    return ids;
+                }
+
+                function findNodeById(id) {
+                    var nodes = controls.$treeView.jstree(true).get_json('#', { flat: true });
+                    var length = nodes.length;
+                    for (var i = 0; i < length; i++) {
+                        if (nodes[i].id === (id + "")) {
+                            return nodes[i];
+                        }
+                    }
+
+                    return null;
+                }
+
+                function ShowDVCQ(data) {
+                    GetControlledDepartments(data);
+                }
+
+                function GetControlledDepartments(data) {
+                    $.ajax({
+                        url: "/permission/GetControlledDepartments",
+                        method: "post",
+                        data: {
+                            accountId: data.node.id.substring(1)
+                        }
+                    }).done(function (d) {
+                        data.node.original.departments = d;
+                        controls.$dBox.data("account", data.node.original);
+                        BinData();
+                    });
+                }
+
+                function GetCurrentAccount() {
+                    return controls.$dBox.data("account");
+                }
+
+                function IsEdit() {
+                    return isEdit;
+                }
+
+                function GetCheckedIds() {
+                    var dseleteds = controls.$treeView.jstree("get_selected", true);
+                    var ids = [];
+                    if ((dseleteds || []).length > 0) {
+                        dseleteds.forEach(function (item) {
+                            if (!item.state.disabled) {
+                                ids.push(item.id)
+                            }
+                        });
+                    }
+
+                    return ids;
+                }
+
+                function intersect_arrays(a, b) {
+                    var sorted_a = a.concat().sort();
+                    var sorted_b = b.concat().sort();
+                    var common = [];
+                    var a_i = 0;
+                    var b_i = 0;
+
+                    while (a_i < a.length
+                        && b_i < b.length) {
+                        if (sorted_a[a_i] === sorted_b[b_i]) {
+                            common.push(sorted_a[a_i]);
+                            a_i++;
+                            b_i++;
+                        }
+                        else if (sorted_a[a_i] < sorted_b[b_i]) {
+                            a_i++;
+                        }
+                        else {
+                            b_i++;
+                        }
+                    }
+                    return common;
+                }
+
+                Init();
+
+                var publicInterfaces = {
+                    DisableAndUncheckAll: DisableAndUncheckAll,
+                    ShowDVCQ: ShowDVCQ,
+                    GetCheckedIds: GetCheckedIds,
+                    GetCurrentAccount: GetCurrentAccount,
+                    IsEdit: IsEdit
+                };
+
+                return publicInterfaces;
+            }();
+        });</script>
+}

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
+	<PackageReference Include="NPOI" Version="2.5.3" />
+    <ProjectReference Include="..\WebClient.Repositories\WebClient.Repositories.csproj" />
+  </ItemGroup>
+
+</Project>

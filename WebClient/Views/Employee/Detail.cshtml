@@ -1,0 +1,390 @@
+﻿@using WebClient.Core.Entities;
+
+@model WebClient.Core.Entities.Employee
+@{
+    ViewData["Title"] = "Nhân viên";
+    int currentUserId = contextFactory.GetInstance().Account.UserId;
+    var tabActive = string.IsNullOrEmpty((string)TempData["TabActive"]) ? "employee" : TempData["TabActive"].ToString();
+}
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item">
+                                <a class="nav-link @(tabActive == "employee"? "active":string.Empty)" href="#employee" data-toggle="tab">Nhân viên</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(tabActive == "account"? "active":string.Empty)" href="#account" data-toggle="tab">Tài khoản</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="@(tabActive == "employee"? "active":"") tab-pane" id="employee">
+                                <form id="formEmployee" class="form-horizontal" show-loader="true" validate="true" method="post" asp-action="SaveEmployee" asp-controller="Employee">
+                                    <div class="row">
+                                        <input name="IdDonVi" id="idDonVi" hidden value="@Model.Id_DonVi" />
+                                        <input name="Id_NhanVien" id="dIdNhanVien" hidden value="@Model.Id_NhanVien" />
+                                        <div class="col-sm-6">
+                                            <div class="form-group row">
+                                                <label for="MaNhanVien" class="col-sm-3 col-form-label">Mã nhân viên</label>
+                                                <div class="col-sm-9">
+                                                    <input readonly type="text" class="form-control" id="dMaNhanVien" name="MaNhanVien" value="@Model.Ma_NhanVien">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="hoten" class="col-sm-3 col-form-label">Họ tên<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="dHoTen" name="HoTen" placeholder="Họ tên" required maxlength="100" value="@Model.Ho_Ten">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="dienthoai" class="col-sm-3 col-form-label">Điện thoại<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="dDienThoai" name="DienThoai" placeholder="Điện Thoại" maxlength="10" required value="@Model.Dien_Thoai">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="namsinh" class="col-sm-3 col-form-label">Năm sinh<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control datepicker" id="dNamSinh" name="NamSinh" placeholder="Năm sinh" required autocomplete="off" value="@Model.Nam_Sinh?.ToString("dd/MM/yyyy")">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="socmnd" class="col-sm-3 col-form-label">Số CMND<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="dSoCMND" name="SoCMND" placeholder="Số CMND" required maxlength="9" value="@Model.So_CMND">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="noicapcmnd" class="col-sm-3 col-form-label">Nơi Cấp CMND<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="dNoiCapCMND" name="NoiCapCMND" placeholder="Nơi cấp CMND" maxlength="200" value="@Model.NoiCap_CMND">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="form-group row">
+                                                <label for="DonVi" class="col-sm-3 col-form-label">Đơn vị</label>
+                                                <div class="col-sm-9">
+                                                    <input disabled type="text" class="form-control" id="dTenDonVi" name="DonVi" value="@ViewBag.DepartmentName">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="diachi" class="col-sm-3 col-form-label">Địa chỉ<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control" id="dDiaChi" name="DiaChi" placeholder="Địa chỉ" maxlength="200" required value="@Model.Dia_Chi">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="email" class="col-sm-3 col-form-label">Email</label>
+                                                <div class="col-sm-9">
+                                                    <input type="email" class="form-control" id="dEmail" name="Email" placeholder="Email" maxlength="50" value="@Model.Email">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="chucvu" class="col-sm-3 col-form-label">Chức vụ<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+
+                                                    @{
+                                                        List<SelectListItem> listItems = new List<SelectListItem>();
+                                                        listItems.Add(new SelectListItem
+                                                        {
+                                                            Text = "Nhân viên",
+                                                            Value = "0"
+                                                        });
+                                                        listItems.Add(new SelectListItem
+                                                        {
+                                                            Text = "Chuyên viên",
+                                                            Value = "1"
+                                                        });
+                                                        listItems.Add(new SelectListItem
+                                                        {
+                                                            Text = "Lãnh đạo",
+                                                            Value = "2"
+                                                        });
+                                                    }
+                                                    @Html.DropDownListFor(model => model.Chuc_Vu, listItems, new { @class = "form-control" })
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="ngaycapcmnd" class="col-sm-3 col-form-label">Ngày cấp cmnd<span class="text-red"> *</span></label>
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control datepicker" id="dNgayCapCMND" name="NgayCapCMND" placeholder="Ngày cấp CMND" required autocomplete="off" value="@Model.NgayCap_CMND?.ToString("dd/MM/yyyy")">
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <label for="ghichu" class="col-sm-3 col-form-label">Ghi Chú</label>
+                                                <div class="col-sm-9">
+                                                    <textarea type="text" class="form-control" id="dGhiChu" name="GhiChu" placeholder="Ghi chú" maxlength="200">@Model.Ghi_Chu</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- /.box-body -->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <button id="btn-delete" type="button" class="btn btn-danger">
+                                                <i class="fas fa-times"></i>
+                                                Xóa
+                                            </button>
+                                            <button id="btn-save" type="button" class="btn btn-primary float-right">
+                                                <i class="far fa-save"></i>
+                                                Lưu
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- /.box-footer -->
+                                </form>
+                                <form id="form-delete-employee" style="display:none !important" asp-controller="employee" asp-action="Delete">
+                                    @Html.AntiForgeryToken()
+                                    <input name="IdDonVi" id="idDonVi" hidden value="@Model.Id_DonVi"/>
+                                    <input type="hidden" name="employeeId" value="@Model.Id_NhanVien" />
+                                </form>
+                            </div>
+                            <div class="@(tabActive == "account"? "active":"") tab-pane" id="account">
+                                <div class="car card-primary">
+                                    <div class="card-header">
+                                        <h3 class="card-title">Tài khoản mới</h3>
+                                    </div>
+                                    <div class="card-body" style="border: 1px solid #d6d6d6">
+                                        <form id="formCreateAccount" class="form-horizontal" show-loader="true" validate="true" method="post" asp-action="CreateAccount" asp-controller="Account">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="Id_NhanVien" value="@Model.Id_NhanVien" />
+                                            <div class="row">
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label for="username">Tên đăng nhập<span class="text-red"> *</span></label>
+                                                        <input type="text" class="form-control" id="iUsername" name="UserName" placeholder="Tên đăng nhập" required maxlength="30">
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label for="password">Mật khẩu<span class="text-red"> *</span></label>
+                                                        <input type="password" class="form-control" id="password" name="MatKhau" placeholder="Mật khẩu" maxlength="50" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <div class="form-group">
+                                                        <label for="repassword" >Nhập lại<span class="text-red"> *</span></label>
+                                                        <input type="password" class="form-control" id="repassword" name="ReMatKhau" placeholder="Nhập lại mật khẩu" maxlength="50" required equalTo="#password">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button id="btn-save" type="button" class="btn btn-primary float-right">Tạo tài khoản</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                <table class="table table-bordered" id="tb-account">
+                                    <tr>
+                                        <th>#</th>
+                                        <th title="Mã số tài khoản">Mã tài khoản</th>
+                                        <th title="Tên đăng nhập">Tên đăng nhập</th>
+                                        <th title="Ngày tạo tài khoản">Ngày tạo</th>
+                                        <th title="Đăng nhập gần đây nhất">Đăng nhập</th>
+                                        <th title="Xóa tài khoản">Xóa</th>
+                                        <th title="Đặt lại tài khoản">Đặt lại mật khẩu</th>
+                                    </tr>
+                                    @{
+                                        IEnumerable<Account> accounts = ViewBag.Accounts;
+                                        if (accounts != null)
+                                        {
+                                            var i = 1;
+                                            foreach (var account in accounts)
+                                            {
+                                                <tr data-aid="@account.Id_NguoiDung">
+                                                    <td>@(i++)</td>
+                                                    <td>@account.Ma_NguoiDung</td>
+                                                    <td class="account-name">
+                                                        @account.UserName
+                                                        @{
+                                                            if (account.Quan_Tri == 1)
+                                                            {
+                                                                <i class="fa fa-star" aria-hidden="true" style="color: #ce0000;"></i>
+                                                            }
+                                                        }
+                                                    </td>
+                                                    <td>@account.Ngay_KhoiTao.ToString(Constants.FormatDate)</td>
+                                                    <td>@account.Ngay_Login?.ToString(Constants.FormatDateTime)</td>
+                                                    @{
+                                                        if (account.Quan_Tri == Constants.States.Actived.GetHashCode() || account.Id_NguoiDung == currentUserId)
+                                                        {
+                                                            <td></td>
+                                                            <td></td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td><button class="btn btn-sm btn-danger btn-delete-account">Xóa</button></td>
+                                                            <td><button class="btn btn-sm btn-success btn-reset-account">Đặt lại</button></td>
+                                                        }
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                </table>
+                                <form style="display:none !important" id="form-delete-account" asp-controller="Account" asp-action="DeleteAccount" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="accountId" id="iaccountId" />
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.modal-dialog -->
+</section>
+<!-- end modal detail-->
+@section Scripts
+{
+    <script type="text/javascript">
+        $(function () {
+            $('.datepicker').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true
+            });
+            var employeeTab = function () {
+                var $tab = $(".tab-pane#employee");
+                var controls = {
+                    $btnSave: $tab.find("#btn-save"),
+                    $btnDelete: $tab.find("#btn-delete"),
+                    $formEmployee: $tab.find("#formEmployee")
+                };
+
+                function Init() {
+                    controls.$btnSave.click(function () {
+                        if (!controls.$formEmployee.valid()) return;
+                        modalHelper.showModal({
+                            title: "Lưu thông tin nhân viên",
+                            body: "Bạn có muốn <strong>lưu</strong> thông tin nhân viên này không?",
+                            buttons: {
+                                submit: "Lưu"
+                            },
+                            submit: function () {
+                                controls.$formEmployee.submit();
+                            }
+                        });
+                    });
+
+                    controls.$btnDelete.click(function () {
+                        modalHelper.showModal({
+                            title: "Xoá nhân viên",
+                            body: "Bạn có muốn <strong>xóa</strong> nhân viên này không?<p>Lưu ý: Các tài khoản của nhân viên này sẽ bị xóa theo</p>",
+                            buttons: {
+                                submit: "Xóa"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $tab.find("#form-delete-employee").submit();
+                            }
+                        });
+                    });
+                }
+
+                Init();
+            }();
+            var accountTab = function () {
+                var $tab = $(".tab-pane#account");
+                var controls = {
+                    $btnCreateAccount: $tab.find("#btn-save"),
+                    $formAccount: $tab.find("#formCreateAccount"),
+                    $iUserName: $tab.find("#iUsername"),
+                    $tbAccount: $tab.find("#tb-account")
+                }
+
+                function Init() {
+                    RegisterEvents();
+                }
+
+                function RegisterEvents() {
+                    controls.$btnCreateAccount.click(function () {
+                        if (!controls.$formAccount.valid()) {
+                            return;
+                        }
+
+                        modalHelper.showModal({
+                            title: "Tạo tài khoản",
+                            body: "Bạn có muốn đăng ký tài khoản <strong>" + controls.$iUserName.val() + "</strong> không?",
+                            buttons: {
+                                submit: "Đăng ký"
+                            },
+                            submit: function () {
+                                controls.$formAccount.submit();
+                            }
+                        });
+                    });
+
+                    controls.$tbAccount.on("click", ".btn-delete-account", function () {
+                        var $tr = $(this).closest("tr");
+                        var idAccount = $tr.data("aid");
+                        var accountName = $tr.find(".account-name").text();
+                        modalHelper.showModal({
+                            title: "Xóa tài khoản",
+                            body: "Bạn có muốn xóa tài khoản <strong>" + accountName + "</strong> không?",
+                            buttons: {
+                                submit: "Xóa tài khoản"
+                            },
+                            submit: function () {
+                                var $form = $tab.find("#form-delete-account");
+                                $form.find("input").val(idAccount);
+                                $form.submit();
+                            }
+                        })
+                    });
+
+                    controls.$tbAccount.on("click", ".btn-reset-account", function () {
+                        var $tr = $(this).closest("tr");
+                        var idAccount = $tr.data("aid");
+                        var accountName = $tr.find(".account-name").text();
+                        modalHelper.showModal({
+                            title: "Đặt lại mật khẩu",
+                            body: "Bạn có muốn đặt lại mật khẩu cho tài khoản <strong>" + accountName + "</strong> không?",
+                            buttons: {
+                                submit: "Đặt lại"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $.ajax({
+                                    url: "/account/ResetPassword",
+                                    type: "post",
+                                    data: {
+                                        accountId: idAccount
+                                    }
+                                }).done(function (data) {
+                                    var alertOption = {
+                                        title: "Đặt lại mật khẩu thành công. Mật khẩu mới là: <strong>" + data + "</strong>.",
+                                        type: alertHelper.AlertTypes.Success,
+                                        timer: 5000
+                                    }
+                                    alertHelper.showAlert(alertOption);
+                                }).fail(function () {
+                                    var alertOption = {
+                                        title: "Đặt lại mật khẩu không thành công.",
+                                        type: alertHelper.AlertTypes.Error,
+                                        timer: 5000
+                                    }
+                                    alertHelper.showAlert(alertOption);
+                                }).always(function () {
+                                    hideLoading();
+                                });
+                            }
+                        })
+                    });
+                }
+
+                Init();
+            }();
+        })
+    </script>
+}

@@ -1,0 +1,315 @@
+﻿@model IEnumerable<Department>
+@{
+    ViewData["Title"] = "Quản lý danh sách nhân viên";
+}
+@functions{
+    string RenderDepartment(Department department)
+    {
+        var htmlstring = "<li data-idDV='{0}' data-tenDV='{1}' data-jstree='{2}'>{1}";
+        htmlstring = string.Format(htmlstring, department.Id_DonVi, department.Ten_DonVi, "{\"icon\":\"fa fa-home\"}");
+        if (department.Children != null && department.Children.Count() > 0)
+        {
+            htmlstring += "<ul>";
+            foreach (var i in department.Children)
+            {
+                htmlstring += RenderDepartment(i);
+            }
+            htmlstring += "</ul>";
+        }
+
+        htmlstring += "</li>";
+
+        return htmlstring;
+    }
+}
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách đơn vị</h3>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var count = (Model == null) ? 0 : Model.Count();
+                            if (count == 0)
+                            {
+                                <span>Không có dữ liệu</span>
+                            }
+                            else
+                            {
+                                <div id="tree-departments" style="display:none">
+                                    <ul>
+                                        @foreach (var i in Model)
+                                        {
+                                            @Html.Raw(RenderDepartment(i));
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách Nhân viên</h3>
+                        <div class="card-tools">
+                            <button id="btn-insertEmployee" type="button" class="btn btn-primary btn-sm btn-tool" data-toggle="modal" data-target="#modal-detail" style="margin-right: 15px;" disabled><i class="fa fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="dt-bootstrap4">
+                            <table id="tbEmployee" class="table table-bordered table-hover dataTable dtr-inline" role="grid" aria-describedby="tbEmployee_info">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Mã nhân viên</th>
+                                        <th>Tên nhân viên</th>
+                                        <th>Chi tiết</th>
+                                        <th>Xóa</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+<!--modal delete-->
+<form id="form-delete" method="post" asp-action="Delete" asp-controller="Employee" style="display: none !important">
+    @Html.AntiForgeryToken()
+    <input type="text" hidden name="employeeId" />
+</form>
+<!--end model delete-->
+<!-- modal detail-->
+<div class="modal fade" id="modal-detail">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">THÊM MỚI NHÂN VIÊN</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="formEmployee" show-loader="true" validate="true" method="post" asp-action="SaveEmployee" asp-controller="Employee">
+                    @Html.AntiForgeryToken()
+                    <div class="">
+                        <input name="MaNhanVien" id="dMaNV" hidden>
+                        <input name="IdDonVi" id="dIdDonVi" hidden />
+                        <input name="Id_NhanVien" id="dIdNhanVien" hidden value="0" />
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="hoten">Họ tên<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control" id="dHoTen" name="HoTen" placeholder="Họ tên" required maxlength="100">
+                                </div>
+                            </div>
+                            <div class="col-sm-6" style="padding:0;">
+                                <div class="form-group">
+                                    <label for="diachi">Địa chỉ<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control" id="dDiaChi" name="DiaChi" placeholder="Địa chỉ" maxlength="200" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="dienthoai">Điện thoại<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control" id="dDienThoai" name="DienThoai" placeholder="Điện Thoại" maxlength="10" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="dEmail" name="Email" placeholder="Email" maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="namsinh">Năm sinh<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control datepicker" id="dNamSinh" name="NamSinh" placeholder="Năm sinh" required autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="chucvu">Chức vụ<span class="text-red"> *</span></label>
+                                    <select class="form-control" name="Chuc_Vu" id="dChucVu">
+                                        <option value="0">Nhân viên</option>
+                                        <option value="1">Chuyên viên</option>
+                                        <option value="2">Lãnh đạo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="socmnd">Số CMND<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control" id="dSoCMND" name="SoCMND" placeholder="Số CMND" required maxlength="9">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="ngaycapcmnd">Ngày cấp cmnd<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control datepicker" id="dNgayCapCMND" name="NgayCapCMND" placeholder="Ngày cấp CMND" required autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="noicapcmnd">Nơi Cấp CMND<span class="text-red"> *</span></label>
+                                    <input type="text" class="form-control" id="dNoiCapCMND" name="NoiCapCMND" placeholder="Nơi cấp CMND" maxlength="200" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="ghichu">Ghi Chú</label>
+                                    <textarea type="text" class="form-control" id="dGhiChu" name="GhiChu" placeholder="Ghi chú" maxlength="200"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Đóng</button>
+                            <button id="btn-save" type="submit" class="btn btn-primary float-right">Lưu</button>
+                        </div>
+                    </div>
+                    <!-- /.box-footer -->
+                </form>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- end modal detail-->
+
+@section Scripts {
+    <!-- bootstrap datepicker -->
+    <script type="text/javascript">
+        //Date picker
+        $('.datepicker').datepicker({
+            format: 'dd/mm/yyyy',
+            autoclose: true
+        });
+        var idDV;
+        var $treeDepartments = $("#tree-departments");
+        $treeDepartments.jstree({
+            "core": {
+                "multiple": false,
+                "check_callback": function (event, b, c, d) {
+                    return event != "edit";
+                }
+            },
+            "plugins": ["conditionalselect"]
+        }).on('changed.jstree', function (e, data) {
+            $('#btn-insertEmployee').attr('disabled', false);
+            table.ajax.reload();
+
+            var d = data.node.data;
+            idDV = d.iddv;
+        });
+        $treeDepartments.show();
+
+        // datatable
+        var table = $("#tbEmployee").DataTable({
+            'paging': true,
+            "responsive": true,
+            'lengthChange': true,
+            'searching': false,
+            'ordering': false,
+            'info': true,
+            'autoWidth': false,
+            "processing": true, // for show progress bar
+            "oLanguage": DataTable.language,
+            "serverSide": true,
+            "ajax": {
+                "url": "/employee/GetEmployeesByDeparmentId",
+                "type": "POST",
+                "data": function (d) {
+                    d.Filter = getIdDonVi();
+                }
+            },
+            "columns": [
+                {
+                    "data": null,
+                    "orderable": false,
+                    "render": function (data, type, full, meta) {
+                        return meta.settings._iDisplayStart + meta.row + 1;
+                    }
+                },
+                {
+                    "data": "ma_NhanVien",
+                },
+                {
+                    "data": "ho_Ten",
+                },
+                {
+                    "data": "id_NhanVien",
+                    "render": function (data, type, row) {
+                        return "<a href='/employee/detail/" + data + "' class='btn btn-success btn-sm btn-detail-employee'>Xem chi tiết</a>";
+                    },
+                },
+                {
+                    "data": "id_NhanVien",
+                    "render": function (data, type, row) {
+                        return "<a href='#' data-idNV =" + data + " data-hoten='" + row["ho_Ten"] + "' class='btn btn-danger btn-sm btn-delete-employee'>Xóa</a>";
+                    },
+                }
+            ]
+        });
+
+        var $modalDetail = $("#modal-detail");
+        var validator = $("#formEmployee").validate();
+        $('#btn-insertEmployee').click(function () {
+            $('.modal-title').text("THÊM MỚI NHÂN VIÊN");
+            $('#btn-save').text("Thêm mới");
+            $('#formEmployee')[0].reset();
+            $('#dGhiChu').text('');
+            validator.resetForm();
+            $('#dIdDonVi').val(idDV);
+        });
+
+        table.on("click", ".btn-delete-employee", function () {
+            var id = $(this).data('idnv');
+            var name = $(this).data('hoten');
+            var option = {
+                title: "Xóa nhân viên",
+                body: 'Bạn có muốn xóa nhân viên <strong>' + name +'</strong> không?',
+                buttons: {
+                    submit: "Đồng ý",
+                    close: "Đóng"
+                },
+                submit: function () {
+                    var $f = $("#form-delete");
+                    $f.find("input[name='employeeId']").val(id);
+                    $f.submit();
+                }
+            };
+            modalHelper.showModal(option);
+        });
+
+        function getIdDonVi() {
+            var nodeCurrent = $("#tree-departments").jstree('get_selected', true);
+            if (nodeCurrent.length == 0) {
+                return 0;
+            }
+            else {
+                return nodeCurrent[0].data.iddv;
+            }
+        }
+    </script>
+}

@@ -1,0 +1,256 @@
+﻿@using WebClient.Core.Entities;
+@using System.Linq;
+@model IEnumerable<Feature>
+@{
+    ViewData["Title"] = "Cấp chức năng cho nhân viên";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@functions {
+
+    string RenderFeature(Feature feature)
+    {
+        var htmlstring = "<li data-id='{0}' data-name='{1}' data-dst='{2}' data-tip='{3}' data-ctr='{4}' data-act='{5}' data-countchild='{6}' data-pr='{7}'>{1}";
+        htmlstring = string.Format(htmlstring, feature.Id_ChucNang, feature.Ten_ChucNang, feature.MoTa_ChucNang, feature.Tooltip, feature.Controller_Name, feature.Action_Name, feature.Children == null ? 0 : feature.Children.Count(), feature.Id_ChucNang_Cha);
+        if (feature.Children != null && feature.Children.Count() > 0)
+        {
+            htmlstring += "<ul>";
+            foreach (var i in feature.Children)
+            {
+                htmlstring += RenderFeature(i);
+            }
+            htmlstring += "</ul>";
+        }
+
+        htmlstring += "</li>";
+
+        return htmlstring;
+    }
+}
+<section class="content">
+    <div class="container-fluid">
+        <input type="text" hidden id="departmentIdCurrent" value="@ViewBag.departmentIdCurrent" />
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card card-primary">
+                    <div class="card-header with-border">
+                        <h3 class="card-title">Danh sách nhân viên</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="tree-view"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card card-primary">
+                    <div class="card-header with-border">
+                        <h3 class="card-title">Danh sách chức năng</h3>
+                        <div class="card-tools">
+                            <button class="btn btn-success btn-sm" id="btn-save-feature" disabled>
+                                <i class="fas fa-save"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var len = Model == null ? 0 : Model.Count();
+                            <div id="@(len > 0 ? "tree-features" : "")">
+                                @{
+                                    if (len == 0)
+                                    {
+                                        <span>Không có dữ liệu</span>
+                                    }
+                                    else
+                                    {
+                                        <ul>
+                                            @foreach (Feature i in Model)
+                                            {
+                                                @Html.Raw(RenderFeature(i));
+                                            }
+                                        </ul>
+                                    }
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="form-set-features" action="/permission/SetFeaturesForAccount" method="post" style="display: none">
+            @Html.AntiForgeryToken()
+        </form>
+    </div>
+</section>
+@section Scripts
+    {
+    <script>
+        var $treeView = $("#tree-view");
+        $treeView.jstree({
+            "core": {
+                'data': function (obj, callback) {
+                    var $this = this;
+                    GetChildrenOfDeparment(obj).done(function (data) {
+                        data.forEach(function (item, index) {
+                            if (item.typeNode == "Employee") {
+                                item.icon = "fa fa-users";
+                            } else if (item.typeNode == "Account") {
+                                item.icon = 'fa fa-user';
+                            }
+                        });
+                        callback.call($this, data);
+                    });
+                }
+            }
+        }).on('changed.jstree', function (e, data) {
+            DisableAndUncheckAllNodeFeature();
+            if (data.node.original.typeNode != "Account") {
+                $("#btn-save-feature").prop("disabled", true);
+            } else {
+                $("#btn-save-feature").prop("disabled", false);
+                BindTreeNode(data.node.id.substring(1, data.node.id.length))
+            }
+        });
+
+        function GetChildrenOfDeparment(obj, callback) {
+            var departmentIdCurrent = $('#departmentIdCurrent').val();
+            if (obj.original && obj.original.typeNode == "Employee") {
+                return $.ajax({
+                    url: "/permission/GetAccountsOfEmployee",
+                    data: {
+                        idEmployee: obj.id.substring(1, obj.id.length)
+                    }
+                })
+            } else {
+                return $.ajax({
+                    url: "/permission/GetChildrenOfDeparment",
+                    method: "post",
+                    data: {
+                        idDeparment: obj.id == "#" ? departmentIdCurrent : obj.id.substring(1, obj.id.length)
+                    }
+                });
+            }
+        }
+
+        function BindTreeNode(accountId) {
+            EnableAllTreeNodeFeature();
+
+            $.ajax({
+                url: "/permission/GetTreeNodeFeaturesOfAccount",
+                method: "GET",
+                data: {
+                    accountId: accountId
+                }
+            }).done(function (data) {
+                if (data == null || data.length == 0) {
+                    return;
+                }
+
+                data.forEach(function (item, index) {
+                    var node = findNodeByDataId(item.id);
+                    if (node && node.data.countchild == 0) {
+                        $treeFeatures.jstree().check_node(node.id);
+                        $treeFeatures.jstree()._open_to(node.id);
+
+                        if (item.typeNode == "P") {
+                            DisableTreeNodeFeature(node.id);
+                        }
+                    }
+                });
+
+            });
+        }
+
+        function findNodeByDataId(id) {
+            var length = featureNodes.length;
+            for (var i = 0; i < length; i++) {
+                if (featureNodes[i].data.id == id) {
+                    return featureNodes[i];
+                }
+            }
+        }
+
+        var $treeFeatures = $("#tree-features");
+        $treeFeatures.jstree({
+            "checkbox": {
+                "keep_selected_style": false,
+                // "three_state": false,
+                // "cascade": "undetermined"
+            },
+            "plugins": ["checkbox"]
+        });
+
+        var featureNodes = $treeFeatures.jstree(true).get_json('#', { flat: true });
+        //DisableTreeNode("j2_2");
+        function DisableTreeNodeFeature(nodeId) {
+            var node = $treeFeatures.jstree().get_node(nodeId);
+            $treeFeatures.jstree().disable_node(node);
+            node.parents.forEach(function (item, index) {
+                var parent = $treeFeatures.jstree().get_node(item);
+                $treeFeatures.jstree().disable_node(parent);
+            });
+        }
+
+        function EnableAllTreeNodeFeature() {
+            var features = $treeFeatures.jstree(true).get_json('#', { flat: true });
+            if (features == null || features.length > 0) {
+                features.forEach(function (item, index) {
+                    if (item.state.disabled)
+                        $treeFeatures.jstree().enable_node(item);
+                });
+            }
+        }
+
+        function DisableAndUncheckAllNodeFeature() {
+            if ($treeFeatures.length === 0) return;
+            $treeFeatures.jstree("deselect_all");
+
+            var features = $treeFeatures.jstree(true).get_json('#', { flat: true });
+            if (features == null || features.length == 0) {
+                return;
+            }
+
+            features.forEach(function (item, index) {
+                $treeFeatures.jstree().disable_node(item);
+            });
+        }
+
+        DisableAndUncheckAllNodeFeature();
+
+        $("#btn-save-feature").click(function () {
+            if ($treeFeatures.length === 0) return;
+            var features = $treeFeatures.jstree(true).get_json('#', { flat: true });
+            if (features == null || features.length == 0) {
+                return;
+            }
+
+            var selectedNodes = $treeFeatures.jstree("get_selected", true);
+            var length = (selectedNodes || []).length;
+            var ids = [];
+            if (length == 0) {
+                return;
+            }
+
+            var dseleteds = $treeView.jstree("get_selected", true);
+            var idAccount = 0;
+            if (dseleteds.length == 0 || dseleteds[0].original.typeNode != "Account") {
+                return;
+            }
+
+            idAccount = dseleteds[0].id.substring(1, dseleteds[0].id.length);
+
+            for (var i = 0; i < length; i++) {
+                if (!selectedNodes[i].state.disabled && selectedNodes[i].data.countchild === 0) {
+                    ids.push(selectedNodes[i].data.id);
+                }
+            }
+
+            var $formSubmit = $("#form-set-features");
+            $formSubmit.append("<input name='idAccount' value=" + idAccount + ">");
+            ids.forEach(function (item, index) {
+                $formSubmit.append("<input name='idFeatures[" + index + "]' value=" + item + ">");
+            });
+
+            $formSubmit.submit();
+        });
+    </script>
+}

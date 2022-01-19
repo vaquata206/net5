@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+    Layout = null;
+    string messageError = this.TempData["messageError"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@ViewData["Title"]</title>
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <environment include="Development">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="/node_modules/admin-lte/plugins/fontawesome-free/css/all.min.css">
+        <!-- icheck bootstrap -->
+        <link rel="stylesheet" href="/node_modules/admin-lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="/node_modules/admin-lte/dist/css/adminlte.min.css">
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="/css/main.min.css?v=@AppSetting.ResourceVersion" />
+    </environment>
+    <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+    <p class="title">
+    QUẢN LÝ TIÊM CHỦNG VACCINE COVID-19<br>
+    QUẬN SƠN TRÀ
+    </p>
+    <form action="/account/login" method="post" validate=true class="col-lg-3 col-md-4 col-sm-10 col-11 login">
+        @Html.AntiForgeryToken()
+        <div class="input-group mb-3">
+            <input type="text" name="username" class="form-control" placeholder="Username" required maxlength="20">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-envelope"></span>
+                </div>
+            </div>
+        </div>
+        <div class="input-group mb-3">
+            <input type="password" name="password" class="form-control" placeholder="Password" minlength="6" required maxlength="50">
+            <div class="input-group-append">
+                <div class="input-group-text">
+                    <span class="fas fa-lock"></span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+            </div>
+        </div>
+        @{
+            if (!string.IsNullOrEmpty(messageError))
+            {
+                <div class="row">
+                    <div class="col-12">
+                        <p style="color: red;">@messageError</p>
+                    </div>
+                </div>
+            }
+        }
+    </form>
+    <environment include="Development">
+        <!-- jQuery -->
+        <script src="/node_modules/admin-lte/plugins/jquery/jquery.min.js"></script>
+        <!-- Bootstrap 4 -->
+        <script src="/node_modules/admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- AdminLTE App -->
+        <script src="/node_modules/admin-lte/dist/js/adminlte.min.js"></script>
+        <script src="/node_modules/jquery-validation/dist/jquery.validate.min.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="/js/main.min.js?v=@AppSetting.ResourceVersion"></script>
+    </environment>
+    <script src="/js/site.js?v=@AppSetting.ResourceVersion"></script>
+    <script src="/js/ValidateAuto.js?v=@AppSetting.ResourceVersion"></script>
+</body>
+</html>

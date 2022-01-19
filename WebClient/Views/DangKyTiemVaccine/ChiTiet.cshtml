@@ -1,0 +1,367 @@
+﻿@model ThongTin_NguoiDan;
+@using System.Globalization;
+@{
+    IEnumerable<DmDoiTuongUuTienInfo> dsDoiTuong = this.ViewBag.DsDoiTuongUuTien;
+    IEnumerable<Department> dsDonVi = this.ViewBag.DsDonVi;
+    IEnumerable<DmDanTocInfo> dsDanToc = this.ViewBag.DsDanToc;
+    IEnumerable<LichSu_Tiem_Vaccine> dsLichSuTiem = this.ViewBag.DsLichSuTiem;
+    ViewData["Title"] = "Thông tin người đăng ký tiêm vaccine";
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div id="tabs" class="card-header">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#detail" data-toggle="tab">Thông tin chi tiết</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#history" data-toggle="tab">Lịch sử tiêm</a></li>
+                </ul>
+            </div>
+            <div class="tab-content">
+                <div class="active tab-pane" id="detail">
+                    <div class="card-body">
+                        <form id="form-save" validate="true" action="/dangkytiemvaccine/save" method="post">
+                            <input hidden name="Id_ThongTin" value="@Model.Id_ThongTin" />
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Họ tên <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="Ho_Ten" maxlength="100" required value="@Model.Ho_Ten">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group row" style="margin: 0px;">
+                                        <label>Giới tính <span class="text-danger">*</span></label>
+                                        <select class="form-control sel" name="Gioi_Tinh" required>
+                                            <option selected="@(Model.Gioi_Tinh == 1 ? true : false)" value="1">Nam</option>
+                                            <option selected="@(Model.Gioi_Tinh == 2 ? true : false)" value="2">Nữ</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Ngày sinh <span class="text-danger">*</span></label>
+                                        <div class="input-group date">
+                                            <input type="text" class="form-control datepicker" name="Ngay_Sinh" placeholder="Chọn ngày sinh" maxlength="10" autocomplete="off" required
+                                                   value="@(Model.Ngay_Sinh == DateTime.MinValue? string.Empty : Model.Ngay_Sinh.ToString(Constants.FormatDate))">
+                                            <div class="input-group-append">
+                                                <div class="input-group-text">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>CMND/CCCD <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="Cmnd" maxlength="50" required value="@Model.CMND">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Số điện thoại <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="So_DienThoai" maxlength="50" required value="@Model.So_DienThoai">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Email</label>
+                                        <input type="email" class="form-control" name="Email" maxlength="50" value="@Model.Email">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Dân tộc <span class="text-danger">*</span></label>
+                                        <select class="sel form-control" name="Id_DanToc" required>
+                                            @{
+                                                foreach (var danToc in dsDanToc)
+                                                {
+                                                    if (Model.Id_DanToc == danToc.Id_DanToc)
+                                                    {
+                                                        <option selected value="@danToc.Id_DanToc">@string.Format("[{0}] - {1}", danToc.Ma_DanToc, danToc.Ten_DanToc)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@danToc.Id_DanToc">@string.Format("[{0}] - {1}", danToc.Ma_DanToc, danToc.Ten_DanToc)</option>
+                                                    }
+
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label>Quốc tịch <span class="text-danger">*</span></label>
+                                        <input class="form-control" name="Quoc_Tich" type="text" value="@Model.Quoc_Tich" maxlength="10" required placeholder="VN">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Nghề nghiệp</label>
+                                        <input class="form-control" name="Nghe_Nghiep" type="text" value="@Model.Nghe_Nghiep" maxlength="50">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Đơn vị công tác</label>
+                                        <input class="form-control" name="DonVi_CongTac" type="text" value="@Model.DonVi_CongTac" maxlength="50">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Số thẻ BHYT</label>
+                                        <input class="form-control" name="SoThe_BHYT" type="text" value="@Model.SoThe_BHYT" maxlength="50">
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>Đối tượng ưu tiên</label>
+                                        <select class="sel form-control" name="Id_DoiTuong_UuTien">
+                                            <option selected="@(Model.Id_DoiTuong_UuTien == 0 ? true : false)" value="0">Không thuộc đối tượng ưu tiên</option>
+                                            @{
+                                                foreach (var doiTuong in dsDoiTuong)
+                                                {
+                                                    if (Model.Id_DoiTuong_UuTien == doiTuong.Id_DoiTuong)
+                                                    {
+                                                        <option selected value="@doiTuong.Id_DoiTuong">@string.Format("[{0}] - {1}", doiTuong.Ma_DoiTuong, doiTuong.Nghe_Nghiep)</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@doiTuong.Id_DoiTuong">@string.Format("[{0}] - {1}", doiTuong.Ma_DoiTuong, doiTuong.Nghe_Nghiep)</option>
+                                                    }
+
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label>Đơn vị <span class="text-danger">*</span></label>
+                                        <select name="Id_DonVi" class="form-control sel" required>
+                                            @{ string RenderDepartmentOptions(IEnumerable<Department> departments, string prefix)
+                                                {
+                                                    var htmlString = "";
+                                                    foreach (var department in departments)
+                                                    {
+                                                        if (department.Id_DonVi == Model.Id_DonVi)
+                                                        {
+                                                            htmlString += string.Format("<option value='{2}' selected>{1}{0}</option>", department.Ten_DonVi, prefix, department.Id_DonVi);
+                                                        }
+                                                        else
+                                                        {
+                                                            htmlString += string.Format("<option value='{2}'>{1}{0}</option>", department.Ten_DonVi, prefix, department.Id_DonVi);
+                                                        }
+                                                        if (department.Children != null)
+                                                        {
+                                                            htmlString += RenderDepartmentOptions(department.Children, prefix + "----");
+                                                        }
+                                                    }
+
+                                                    return htmlString;
+                                                }
+                                                var lenth = (dsDonVi == null) ? 0 : dsDonVi.Count();
+                                                if (lenth == 0)
+                                                {
+                                                    <option value="0">--Không có đơn vị cha--</option>
+                                                }
+                                                else
+                                                {
+                                                    @Html.Raw(RenderDepartmentOptions(dsDonVi, ""));
+                                                } }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="form-group">
+                                        <label>Địa chỉ hiện tại <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="DiaChi_HienTai" maxlength="200" required value="@Model.DiaChi_HienTai">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Tình trạng tiêm chủng <span class="text-danger">*</span></label>
+                                        <div class="custom-control custom-radio">
+                                            <input checked="@(Model.SoMuiDaTiem == 0 ? true : false)" value="0" class="custom-control-input" type="radio" id="tinhTrangTiem" name="SoMuiDaTiem">
+                                            <label for="tinhTrangTiem" class="custom-control-label">Chưa tiêm</label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input checked="@(Model.SoMuiDaTiem == 1 ? true : false)" value="1" class="custom-control-input" type="radio" id="tinhTrangTiem1" name="SoMuiDaTiem">
+                                            <label for="tinhTrangTiem1" class="custom-control-label">Đã tiêm 1 mũi</label>
+                                        </div>
+                                        <div class="custom-control custom-radio">
+                                            <input checked="@(Model.SoMuiDaTiem == 2 ? true : false)" value="2" class="custom-control-input" type="radio" id="tinhTrangTiem2" name="SoMuiDaTiem">
+                                            <label for="tinhTrangTiem2" class="custom-control-label">Đã tiêm 2 mũi</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <a href="/dangkytiemvaccine" class="btn btn-default" type="button">
+                            <i class="fas fa-arrow-left"></i>
+                            Quay về
+                        </a>
+                        <button id="btn-save" class="float-right btn btn-primary" type="button">
+                            <i class="far fa-save"></i>
+                            Lưu
+                        </button>
+                        <button id="btn-del" class="float-right btn btn-danger" type="button" style="margin-right: 15px;">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                            Xóa
+                        </button>
+                    </div>
+                </div>
+                <div class="tab-pane" id="history">
+                    <div class="card-body">
+                        @if (dsLichSuTiem.Count() == 0)
+                        {
+                            <h5 style="text-align: center">Chưa có thông tin lịch sử tiêm</h5>
+                        }
+                        else
+                        {
+                    <div class="timeline">
+                        @foreach (var lichSu in dsLichSuTiem)
+                        {
+                            <!-- Timeline time label -->
+                            <div class="time-label">
+                                <span class="bg-red">Ngày tiêm: @lichSu.Ngay_Tiem.ToString(Constants.FormatDate, CultureInfo.InvariantCulture)</span>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-stethoscope bg-yellow"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Tên kế hoạch: <a href="#">@lichSu.Ten_KeHoach</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-hospital bg-green" aria-hidden="true"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Đội tiêm: <a href="#">@lichSu.Ten_DoiTiem</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-map-marker bg-red"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Địa điểm tiêm: <a href="#">@lichSu.DiaDiem_Tiem</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fas fa-syringe bg-orange"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Lô vaccine: <a href="#">@lichSu.Lo_Vaccine</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fas fa-syringe bg-yellow"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Loại vaccine: <a href="#">@lichSu.Loai_Vaccine</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-thermometer-three-quarters bg-green"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Phản ứng sau tiêm: <a href="#">@lichSu.PhanUng_SauTiem</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-dot-circle bg-red"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Số mũi tiêm: <a href="#">@lichSu.SoMui_DaTiem</a></h3>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Before each timeline item corresponds to one icon on the left scale -->
+                                <i class="fa fa-calendar-check bg-orange"></i>
+                                <!-- Timeline item -->
+                                <div class="timeline-item">
+                                    <!-- Header. Optional -->
+                                    <h3 class="timeline-header">Ngày nhập thông tin: <a href="#">@lichSu.NgayNhap_ThongTin.ToString(Constants.FormatDate, CultureInfo.InvariantCulture)</a></h3>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form id="form-delete" action="/dangkytiemvaccine/delete" method="post" style="display: none !important">
+        <input name="Id" hidden value="@Model.Id_ThongTin" />
+    </form>
+</section>
+@section Scripts{
+    <script>
+        $(function () {
+            $(".sel").select2({
+                theme: 'bootstrap4'
+            });
+
+            $.fn.datepicker.defaults.format = "dd/mm/yyyy";
+            $(".datepicker").datepicker({
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom right"
+            });
+
+            $("#btn-save").click(function () {
+                var $form = $("#form-save");
+                if (!$form.valid()) {
+                    return;
+                }
+
+                $form.submit();
+            });
+
+            $("#btn-del").click(function () {
+                var id = $("input[name=Id_ThongTin]").val();
+                var hoTen = $("input[name=Ho_Ten]").val();
+                modalHelper.showModal({
+                    title: "Xóa thông tin đăng ký tiêm vaccine",
+                    body: "Bạn có muốn xóa thông tin của công dân <strong>" + hoTen + "</strong> không?",
+                    buttons: {
+                        submit: "Đồng ý",
+                        close: "Đóng"
+                    },
+                    submit: function () {
+                        $("#form-delete").submit();
+                    },
+                });
+            });
+        });
+    </script>
+}

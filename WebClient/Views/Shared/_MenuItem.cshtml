@@ -1,0 +1,55 @@
+﻿@model Menu
+@{
+    var menu = (IEnumerable<Menu>)this.ViewData["menu"];
+    string controllerActive = (string)this.ViewData["controllerActive"];
+    string actionActive = (string)this.ViewData["actionActive"];
+    var children = menu.Where(x => x.ParentId == Model.Id);
+    var isChild = children != null && children.Count() > 0;
+    var url = string.Empty;
+    if (isChild)
+    {
+        url = "#";
+    }
+    else
+    {
+        url = Model.Url ?? string.Format("{0}/{1}", Model.Controler, Model.Action).Trim('/');
+        url = "/" + url;
+    }
+    var icon = Model.Icon ?? "fa-check";
+    var curAction = string.IsNullOrEmpty(Model.Action) ? "index" : Model.Action.ToLower();
+    var isActive = (controllerActive == Model.Controler?.ToLower() && actionActive == curAction);
+    if (this.ViewBag.IsActive == null) { this.ViewBag.IsActive = new bool[1]; }
+    var htmlChildren = new List<Microsoft.AspNetCore.Html.IHtmlContent>();
+    foreach (var m in children)
+    {
+        htmlChildren.Add(await Html.PartialAsync("_MenuItem", m, this.ViewData));
+        isActive |= this.ViewBag.IsActive == null ? false : (bool)this.ViewBag.IsActive[0];
+    }
+
+    this.ViewBag.IsActive[0] = isActive;
+}
+<li class="nav-item @((htmlChildren.Count > 0 && isActive)? "menu-open": string.Empty)">
+    <a href="@url" class="nav-link @(isActive? "active" : string.Empty)">
+        <i class="nav-icon fa @icon"></i>
+        <p>
+            @Model.Name
+            @{
+                if (isChild)
+                {
+                    <i class="right fas fa-angle-left"></i>
+                }
+            }
+        </p>
+    </a>
+    @{
+        if (isChild)
+        {
+            <ul class="nav nav-treeview">
+                @foreach (var m in htmlChildren)
+                {
+                    @m
+                }
+            </ul>
+        }
+    }
+</li>
