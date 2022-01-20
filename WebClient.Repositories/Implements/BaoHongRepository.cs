@@ -97,6 +97,11 @@ namespace WebClient.Repositories.Implements
                 whereClause.Add("IdKiThuatXuLy = @IdKiThuatXuLy");
             }
 
+            if (search.IdTrangThaiPhieu > 0)
+            {
+                whereClause.Add("IdTrangThaiPhieu = @IdTrangThaiPhieu");
+            }
+
             whereClause.Add("daxoa = 0");
             var whereString = string.Join(" AND ", whereClause);
             var list = await this.dbContext.QueryAsync<BaoHongInfo>(
@@ -114,7 +119,8 @@ namespace WebClient.Repositories.Implements
                     TuNgay = tuNgay,
                     DenNgay = denNgay,
                     search.TrangThai,
-                    search.IdKiThuatXuLy
+                    search.IdKiThuatXuLy,
+                    search.IdTrangThaiPhieu
                 });
 
             return list;

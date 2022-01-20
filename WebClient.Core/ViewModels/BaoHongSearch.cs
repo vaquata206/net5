@@ -7,5 +7,6 @@
         public int TrangThai { get; set; }
         public int? IdKhachHang { get; set; }
         public int? IdKiThuatXuLy { get; set; }
+        public int IdTrangThaiPhieu { get; set; }
     }
 }

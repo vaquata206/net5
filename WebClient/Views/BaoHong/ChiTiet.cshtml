@@ -199,6 +199,47 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Lịch sử</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Trạng thái</th>
+                                    <th>Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ 
+                                    foreach (var i in ChiTiet) {
+                                        var tenTrangThai = "";
+                                        switch (i.IdTrangThaiPhieu)
+                                        {
+                                            case 1:
+                                                tenTrangThai = "Phiếu đã gửi"; break;
+                                            case 2:
+                                                tenTrangThai = "Phiếu đã tiếp nhận"; break;
+                                            case 3:
+                                                tenTrangThai = "Phiếu giao kỹ thuật"; break;
+                                            case 4:
+                                                tenTrangThai = "Phiếu giao kỹ thuật"; break;
+                                        }
+                                        <tr>
+                                            <td>@tenTrangThai</td>
+                                            <td>@i.ThoiGian.ToString("dd/MM/yyyy HH:mm")</td>
+                                        </tr>
+                                        }
+                                    }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 @section Scripts{
@@ -207,104 +248,104 @@
             var detailPanel = function () {
                 $formKhachHang = $("#form-save");
                 function init() {
-                    registerEvents();
-                    var value = $("[name='DiemDanhGia']").data('value');
-                    if (value > 0) {
+                                        registerEvents();
+                                        var value = $("[name='DiemDanhGia']").data('value');
+                                        if (value > 0) {
                         $("[name='DiemDanhGia']").val(value);
-                    }
-                }
+                                        }
+                                    }
 
-                function registerEvents() {
+                                    function registerEvents() {
                     $("#btn-save").click(function () {
-                        if (!$formKhachHang.valid()) {
-                            return;
-                        }
+                                            if (!$formKhachHang.valid()) {
+                                                return;
+                                            }
 
-                        modalHelper.showModal({
-                            title: "Lưu báo hỏng",
+                                            modalHelper.showModal({
+                                            title: "Lưu báo hỏng",
                             body: "Bạn có muốn gửi yêu cầu báo hỏng này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
-                                showLoading();
+                                                    showLoading();
                                 $formKhachHang.submit();
-                            }
-                        })
+                                                }
+                                            })
                     });
                     $("#btn-tiepnhan").click(function () {
-                        modalHelper.showModal({
-                            title: "Tiếp nhận",
+                                            modalHelper.showModal({
+                                            title: "Tiếp nhận",
                             body: "Bạn có muốn tiếp nhận cầu báo hỏng này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
-                                showLoading();
+                                                    showLoading();
                                 $formKhachHang.attr("action", "/baohong/tiepnhan");
                                 $formKhachHang.submit();
-                            }
-                        })
+                                                }
+                                            })
                     });
                     $("#btn-chuyenkithuat").click(function () {
-                        modalHelper.showModal({
-                            title: "Chuyển kĩ thuật",
+                                            modalHelper.showModal({
+                                            title: "Chuyển kĩ thuật",
                             body: "Bạn có muốn chuyển kĩ thuật xử lý báo hỏng này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
-                                showLoading();
+                                                    showLoading();
                                 $formKhachHang.attr("action", "/baohong/chuyenkythuat");
                                 $formKhachHang.submit();
-                            }
-                        });
-                    });
+                                                }
+                                            });
+                                        });
                     $("#btn-hoanthanh").click(function () {
-                        modalHelper.showModal({
-                            title: "Hoàn thành",
+                                            modalHelper.showModal({
+                                            title: "Hoàn thành",
                             body: "Bạn có muốn hoàn thành phiếu báo hỏng này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
-                                showLoading();
+                                                    showLoading();
                                 $formKhachHang.attr("action", "/baohong/hoanthanh");
                                 $formKhachHang.submit();
-                            }
-                        });
-                    });
+                                                }
+                                            });
+                                        });
                     $("#btn-guidanhgia").click(function () {
-                        modalHelper.showModal({
-                            title: "Gửi đánh giá",
+                                            modalHelper.showModal({
+                                            title: "Gửi đánh giá",
                             body: "Bạn có muốn gửi đánh giá này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
-                                showLoading();
+                                                    showLoading();
                                 $formKhachHang.attr("action", "/baohong/danhgia");
                                 $formKhachHang.submit();
-                            }
-                        });
-                    });
+                                                }
+                                            });
+                                        });
                     $("#btn-delete").click(function () {
-                        modalHelper.showModal({
-                            title: "Xóa báo hỏng",
+                                            modalHelper.showModal({
+                                            title: "Xóa báo hỏng",
                             body: "Bạn có muốn xóa khách hàng này không?",
                             buttons: {
-                                submit: "Đồng ý",
+                                                submit: "Đồng ý",
                                 close: "Đóng"
                             },
                             submit: function () {
                                 $("#form-delete").submit();
-                            }
-                        })
+                                                }
+                                            })
                     });
                 }
 

@@ -13,6 +13,7 @@ namespace WebClient.Core
         public static readonly string Key_SSOServiceName = "SSOService:ServiceName";
         public static readonly string Key_SSOServer = "SSOService:Server";
         public static readonly string Key_SyncUrl = "SyncUrl";
+        public static readonly string Key_JWTKey = "JWTKey";
 
         private readonly IConfiguration Configuration;
         private string connectionString;
@@ -24,11 +25,14 @@ namespace WebClient.Core
         private string sSOServiceName;
         private string sSOServer;
         private string syncUrl;
+        private string jwtKey;
 
         public AppSetting(IConfiguration configuration)
         {
             this.Configuration = configuration;
         }
+
+
 
         public string ConnectionString => this.connectionString ??= this.Configuration[Key_ConnectionString];
 
@@ -63,5 +67,6 @@ namespace WebClient.Core
 
         public string SyncUrl => this.syncUrl ??= this.Configuration[Key_SyncUrl];
 
+        public string JWTKey => this.jwtKey ??= this.Configuration[Key_JWTKey];
     }
 }

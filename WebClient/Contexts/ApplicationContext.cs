@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
+using Microsoft.IdentityModel.Tokens;
 using WebClient.Core;
 using WebClient.Core.Models;
 using WebClient.Extensions;
@@ -140,6 +143,40 @@ namespace WebClient.Contexts
                         // IsPersistent = true, // for 'remember me' feature
                         ExpiresUtc = DateTime.UtcNow.AddMinutes(appSetting.ExpiredTicket)
                     });
+        }
+
+        public LoginResponse GetLoginResponse(AccountInfo account)
+        {
+            // Gets a bear token for session
+            // This token will be pass to header of requests for authen
+            var token = this.BuildToken(account);
+
+            return new LoginResponse
+            {
+                Token = token,
+                Account = account
+            };
+        }
+
+        /// <summary>
+        /// Build authen token
+        /// </summary>
+        /// <param name="account">The account</param>
+        /// <returns>The token</returns>
+        private string BuildToken(AccountInfo account)
+        {
+            ClaimsIdentity claimsIdentity = CreateClaimsIdentity(account);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSetting.JWTKey));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                issuer: null,
+                audience: null,
+                claims: claimsIdentity.Claims,
+                expires: DateTime.Now.AddMinutes(360), // expire time là 30 phút
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         /// <summary>
