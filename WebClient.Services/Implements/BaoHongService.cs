@@ -118,7 +118,10 @@ namespace WebClient.Services.Implements
         public async Task HoanThanh(int id, int idNhanVien)
         {
             var baohong = await this.unitOfWork.BaoHongRepository.GetByIdAsync(id);
+            var chitietphieu = await this.GetChiTietBaoHong(id);
+            var ctkt = chitietphieu.LastOrDefault(x => x.IdTrangThaiPhieu == 3);
             baohong.IdTrangThaiPhieu = 4;
+            baohong.TinhTrang = (DateTime.Now - ctkt.ThoiGian) > TimeSpan.FromHours(2) ? 2 : 1;
             await this.unitOfWork.BaoHongRepository.UpdateAsync(baohong);
             var chitiet = new ChiTietPhieuBaoHong
             {
@@ -128,6 +131,15 @@ namespace WebClient.Services.Implements
                 ThoiGian = DateTime.Now
             };
             await this.unitOfWork.BaoHongRepository.AddAsync(chitiet);
+            this.unitOfWork.Commit();
+        }
+
+        public async Task GuiDanhGia(DanhGiaVM danhGiaVM)
+        {
+            var baohong = await this.unitOfWork.BaoHongRepository.GetByIdAsync(danhGiaVM.Id);
+            baohong.DiemDanhGia = danhGiaVM.DiemDanhGia;
+            baohong.NoiDungDanhGia = danhGiaVM.NoiDungDanhGia;
+            await this.unitOfWork.BaoHongRepository.UpdateAsync(baohong);
             this.unitOfWork.Commit();
         }
     }

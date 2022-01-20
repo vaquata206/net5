@@ -107,5 +107,14 @@ namespace WebClient.Controllers
             this.SetSuccessAlert("Báo hoàn thành thành công");
             return this.Redirect("/baohong/chitiet/" + id);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DanhGia(DanhGiaVM danhGiaVM)
+        {
+            await this.baoHongService.GuiDanhGia(danhGiaVM);
+            this.SetSuccessAlert("Báo hoàn thành thành công");
+            return this.Redirect("/baohong/chitiet/" + danhGiaVM.Id);
+        }
     }
 }

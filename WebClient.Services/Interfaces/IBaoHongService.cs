@@ -19,5 +19,6 @@ namespace WebClient.Services.Interfaces
         Task ChuyenKyThuat(ChuyenKyThuatVM viewModal);
         Task<IEnumerable<ChiTietPhieuBaoHong>> GetChiTietBaoHong(int id);
         Task HoanThanh(int id, int idNhanVien);
+        Task GuiDanhGia(DanhGiaVM danhGiaVM);
     }
 }

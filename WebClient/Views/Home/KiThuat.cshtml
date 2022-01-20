@@ -11,59 +11,59 @@
     <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
         @*<div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>1</h3>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>1</h3>
 
-                        <p>Doanh nghiệp</p>
+                            <p>Doanh nghiệp</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-city"></i>
+                        </div>
+                        <a href="/admin/nhaxuong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-city"></i>
-                    </div>
-                    <a href="/admin/nhaxuong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>1</h3>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>1</h3>
 
-                        <p>Quỹ đất trống</p>
+                            <p>Quỹ đất trống</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <a href="/admin/quydattrong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-map-marked-alt"></i>
-                    </div>
-                    <a href="/admin/quydattrong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>1</h3>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>1</h3>
 
-                        <p>Nhà xưởng</p>
+                            <p>Nhà xưởng</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <a href="/admin/nhaxuong?isNhaXuong=True" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-industry"></i>
-                    </div>
-                    <a href="/admin/nhaxuong?isNhaXuong=True" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>1</h3>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>1</h3>
 
-                        <p>Văn bản</p>
+                            <p>Văn bản</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <a href="/admin/vanban" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
-                    <div class="icon">
-                        <i class="fas fa-file"></i>
-                    </div>
-                    <a href="/admin/vanban" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-            </div>
-        </div>*@
+            </div>*@
         <!-- /.row -->
         <!-- Main row -->
         <div class="row">
@@ -171,7 +171,7 @@
 
                 function loadDatatable() {
                     $.ajax({
-                        url: "/baohong/search",
+                        url: "/home/search",
                         method: "POST",
                         data: searchPanel.get(),
                         dataType: "JSON",
@@ -217,7 +217,7 @@
                                         "title": "Ngày tạo",
                                         "data": "ngayKhoiTao",
                                         "render": function (data, type, full, meta) {
-                                            return dateTimeHelper.dateToString(full.ngayKhoiTao);
+                                            return dateTimeHelper.dateTimeToString(full.ngayKhoiTao);
                                         }
                                     },
                                     {

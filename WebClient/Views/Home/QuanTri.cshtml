@@ -171,7 +171,7 @@
 
                 function loadDatatable() {
                     $.ajax({
-                        url: "/baohong/search",
+                        url: "/home/search",
                         method: "POST",
                         data: searchPanel.get(),
                         dataType: "JSON",
@@ -217,7 +217,7 @@
                                         "title": "Ngày tạo",
                                         "data": "ngayKhoiTao",
                                         "render": function (data, type, full, meta) {
-                                            return dateTimeHelper.dateToString(full.ngayKhoiTao);
+                                            return dateTimeHelper.dateTimeToString(full.ngayKhoiTao);
                                         }
                                     },
                                     {
@@ -225,8 +225,36 @@
                                         "data": "trangThai"
                                     },
                                     {
+                                        "title": "Ngày HT",
+                                        "render": function (data, type, full, meta) {
+                                            return dateTimeHelper.dateTimeToString(full.hoanThanh);
+                                        }
+                                    },
+                                    {
+                                        "title": "Đúng hạn",
+                                        "render": function (data, type, full, meta) {
+                                            if (full.tinhTrang == 1) {
+                                                return "Đúng hạn";
+                                            } else if (full.tinhTrang == 2) {
+                                                return "Trể hạn";
+                                            }
+                                            return "";
+                                        }
+                                    },
+                                    {
                                         "title": "Đánh giá",
-                                        "data": "diemDanhGia"
+                                        "data": "diemDanhGia",
+                                        "render": function (data, type, full, meta) {
+                                            switch (full.diemDanhGia) {
+                                                case 1: return 'Không hài lòng'; break;
+                                                case 2: return 'Tạm được'; break;
+                                                case 3: return 'Được'; break;
+                                                case 4: return 'Hài Lòng'; break;
+                                                case 5: return 'Rất hài Lòng'; break;
+                                            }
+
+                                            return '';
+                                        }
                                     },
                                     {
                                         "title": "Chi tiết",

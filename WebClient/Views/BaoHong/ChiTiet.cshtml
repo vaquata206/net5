@@ -105,6 +105,32 @@
                                             </div>
                                         </div>
                                     }
+
+                                    if (Model.IdTrangThaiPhieu == 4 && (account.IsKhachHang || Model.DiemDanhGia.HasValue))
+                                    {
+                                        <div class="col-sm-6">
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Đánh giá</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control" name="DiemDanhGia" required data-value="@Model.DiemDanhGia">
+                                                        <option value="5">Rất hài lòng</option>
+                                                        <option value="4">Hài lòng</option>
+                                                        <option value="3">Được</option>
+                                                        <option value="2">Tạm được</option>
+                                                        <option value="1">Không hài lòng</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-12">
+                                            <div class="form-group row">
+                                                <label class="col-sm-2 col-form-label">Ghi chú</label>
+                                                <div class="col-sm-10">
+                                                    <textarea class="form-control" name="NoiDungDanhGia">@Model.NoiDungDanhGia</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
                                 }
                             </div>
                         </form>
@@ -112,14 +138,14 @@
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-sm-6">
-                                <a href="/baohong" class="btn btn-default">
+                                <a href="/" class="btn btn-default">
                                     <i class="fas fa-arrow-left"></i>
                                     Quay về
                                 </a>
                             </div>
                             <div class="col-sm-6">
                                 @{
-                                    if (Model.Id > 0)
+                                    if (Model.Id > 0 && false)
                                     {
                                         <button id="btn-delete" type="button" class="btn btn-danger ml-2 float-right">
                                             <i class="fas fa-times"></i>
@@ -159,6 +185,13 @@
                                             Hoàn thành
                                         </button>
                                     }
+                                    if (account.IsKhachHang && Model.IdTrangThaiPhieu == 4 && !Model.DiemDanhGia.HasValue)
+                                    {
+                                        <button id="btn-guidanhgia" type="button" class="btn btn-primary float-right" style="margin-right: 5px">
+                                            <i class="far fa-save"></i>
+                                            Gửi đánh giá
+                                        </button>
+                                    }
                                 }
                             </div>
                         </div>
@@ -175,6 +208,10 @@
                 $formKhachHang = $("#form-save");
                 function init() {
                     registerEvents();
+                    var value = $("[name='DiemDanhGia']").data('value');
+                    if (value > 0) {
+                        $("[name='DiemDanhGia']").val(value);
+                    }
                 }
 
                 function registerEvents() {
@@ -237,6 +274,21 @@
                             submit: function () {
                                 showLoading();
                                 $formKhachHang.attr("action", "/baohong/hoanthanh");
+                                $formKhachHang.submit();
+                            }
+                        });
+                    });
+                    $("#btn-guidanhgia").click(function () {
+                        modalHelper.showModal({
+                            title: "Gửi đánh giá",
+                            body: "Bạn có muốn gửi đánh giá này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $formKhachHang.attr("action", "/baohong/danhgia");
                                 $formKhachHang.submit();
                             }
                         });

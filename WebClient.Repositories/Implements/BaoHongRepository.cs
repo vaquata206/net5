@@ -72,39 +72,49 @@ namespace WebClient.Repositories.Implements
             if (!string.IsNullOrEmpty(search.TuNgay))
             {
                 tuNgay = DateTime.ParseExact(search.TuNgay, Constants.FormatDate, CultureInfo.InvariantCulture);
-                whereClause.Add("pbh.NgayKhoiTao >= @TuNgay");
+                whereClause.Add("NgayKhoiTao >= @TuNgay");
             }
 
             DateTime? denNgay = null;
             if (!string.IsNullOrEmpty(search.DenNgay))
             {
                 denNgay = DateTime.ParseExact(search.DenNgay, Constants.FormatDate, CultureInfo.InvariantCulture).AddDays(1);
-                whereClause.Add("pbh.NgayKhoiTao < @DenNgay");
+                whereClause.Add("NgayKhoiTao < @DenNgay");
             }
 
             if (search.TrangThai > 0)
             {
-                whereClause.Add("pbh.IdTrangThaiPhieu = @TrangThai");
+                whereClause.Add("IdTrangThaiPhieu = @TrangThai");
             }
 
             if (search.IdKhachHang.HasValue)
             {
-                whereClause.Add("dvkh.IdKhachHang = @IdKhachHang");
+                whereClause.Add("IdKhachHang = @IdKhachHang");
             }
 
-            whereClause.Add("pbh.daxoa = 0");
+            if (search.IdKiThuatXuLy.HasValue)
+            {
+                whereClause.Add("IdKiThuatXuLy = @IdKiThuatXuLy");
+            }
+
+            whereClause.Add("daxoa = 0");
             var whereString = string.Join(" AND ", whereClause);
             var list = await this.dbContext.QueryAsync<BaoHongInfo>(
-                sql: string.Format(@"SELECT PBH.ID, DV.TEN DICHVU, DVKH.IDDICHVU, PBH.NGAYKHOITAO, PBH.IDTRANGTHAIPHIEU, TTP.TEN TRANGTHAI, PBH.DIEMDANHGIA, DVKH.IDKHACHHANG FROM PHIEUBAOHONG PBH
+                sql: string.Format(@"SELECT * FROM (
+                                    SELECT PBH.ID, DV.TEN DICHVU, DVKH.IDDICHVU, PBH.NGAYKHOITAO, PBH.IDTRANGTHAIPHIEU, TTP.TEN TRANGTHAI, PBH.DIEMDANHGIA, DVKH.IDKHACHHANG, PBH.DAXOA,
+                                    (SELECT CT.IdNhanVien FROM CHITIETPHIEUBAOHONG CT WHERE CT.IdPhieuBaoHong = PBH.ID AND CT.IdTrangThaiPhieu = 3) IdKiThuatXuLy,
+                                    (SELECT CT.THOIGIAN FROM CHITIETPHIEUBAOHONG CT WHERE CT.IdPhieuBaoHong = PBH.ID AND CT.IdTrangThaiPhieu = 4) HOANTHANH, PBH.TINHTRANG
+                                    FROM PHIEUBAOHONG PBH
                                     JOIN DICHVUKHACHHANG DVKH ON DVKH.ID = PBH.IDDICHVUKHACHHANG
                                     JOIN DICHVU DV ON DVKH.IDDICHVU = DV.ID
-                                    JOIN TRANGTHAIPHIEU TTP ON TTP.ID = PBH.IDTRANGTHAIPHIEU
+                                    JOIN TRANGTHAIPHIEU TTP ON TTP.ID = PBH.IDTRANGTHAIPHIEU) BAOHONG
                                     WHERE {0} ORDER BY NGAYKHOITAO DESC", whereString),
                 param: new { 
                     search.IdKhachHang,
                     TuNgay = tuNgay,
                     DenNgay = denNgay,
-                    search.TrangThai
+                    search.TrangThai,
+                    search.IdKiThuatXuLy
                 });
 
             return list;

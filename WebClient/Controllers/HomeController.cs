@@ -49,5 +49,22 @@ namespace WebClient.Controllers
             this.ViewBag.TrangThai = trangThai;
             return View();
         }
+
+        public async Task<IActionResult> KiThuat()
+        {
+            var trangThai = await this.baoHongService.GetTrangThai();
+            this.ViewBag.TrangThai = trangThai;
+            return View();
+        }
+
+        public async Task<IActionResult> SearchAsync(BaoHongSearch search)
+        {
+            if (this.BaseContext.Account.IdVaiTro == 1)
+            {
+                search.IdKiThuatXuLy = this.BaseContext.Account.IdNhanVien;
+            }
+            var response = await this.baoHongService.SearchAsync(search);
+            return this.Ok(response);
+        }
     }
 }
