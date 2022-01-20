@@ -32,7 +32,8 @@ a {
 .authen {
     overflow: hidden;
     background-color: white;
-    padding: 15px;
+    padding: 0px;
+    width: 500px;
     border-radius: 10px;
     position: absolute;
     top: 50%;
@@ -189,7 +190,7 @@ label.error::after {
     display: flex;
     height: 40px;
     padding: 0px;
-    background: #17a2b8;
+    background: #0b8ef2;
     border: none;
     outline: none;
     border-radius: 5px;

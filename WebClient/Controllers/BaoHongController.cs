@@ -64,6 +64,8 @@ namespace WebClient.Controllers
                 chiTiet = await this.baoHongService.GetChiTietBaoHong(entity.Id);
             }
             var dichVu = await this.baoHongService.GetDichVuByKhachHangId(dichVuKhachHang.Id == 0 ? this.BaseContext.Account.IdKhachHang.Value: dichVuKhachHang.IdKhachHang);
+
+            this.ViewBag.KhachHang = await this.baoHongService.GetKhachHang(dichVuKhachHang.Id == 0 ? this.BaseContext.Account.IdKhachHang.Value : dichVuKhachHang.IdKhachHang);
             this.ViewBag.DichVuKhachHang = dichVuKhachHang;
             this.ViewBag.DichVu = dichVu;
             this.ViewBag.Account = this.BaseContext.Account;

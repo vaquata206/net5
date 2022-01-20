@@ -20,5 +20,6 @@ namespace WebClient.Services.Interfaces
         Task<IEnumerable<ChiTietPhieuBaoHong>> GetChiTietBaoHong(int id);
         Task HoanThanh(int id, int idNhanVien);
         Task GuiDanhGia(DanhGiaVM danhGiaVM);
+        Task<KhachHang> GetKhachHang(int v);
     }
 }

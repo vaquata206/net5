@@ -14,5 +14,6 @@ namespace WebClient.Repositories.Interfaces
         Task<DichVuKhachHang> GetDichVuKhachHang(int idKhachHang, int idDichVu);
         Task<DichVuKhachHang> GetDichVuKhachHangByIdAsync(int idDichVuKhachHang);
         Task<IEnumerable<ChiTietPhieuBaoHong>> GetChiTietBaoHong(int id);
+        Task<KhachHang> GetKhachHang(int v);
     }
 }

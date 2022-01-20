@@ -25,27 +25,12 @@
 
 </head>
 <body class="hold-transition login-page">
-
-    <div class="split left bg-page">
-        <div class="section transheader homepage">
-            <div class="text-center">
-                <h2>@localizer["BAN QUẢN LÝ KHU CÔNG NGHỆ CAO"]</h2>
-                <h2>@localizer["VÀ CÁC KHU CÔNG NGHIỆP ĐÀ NẴNG"]</h2>
-            </div>
+    <div class="login-box">
+        <div class="login-logo">
+            <a href="#"><b>THI ĐÁNH GIÁ NĂNG LỰC</b><br />TTCNTT-VNPT ĐÀ NẴNG</a>
         </div>
-    </div>
-
-    <div class="split right">
-        <div class="transheader headerTitle">
-            <div class="col-md-12 col-md-offset-1 col-sm-12 text-center">
-                <h2>@localizer["KHU CÔNG NGHỆ CAO ĐÀ NẴNG"]</h2>
-            </div>
-        </div>
-        <div class="login-box">
-            <div class="">
-                @RenderBody()
-            </div>
-        </div>
+        <!-- /.login-logo -->
+        @RenderBody()
     </div>
 
     <environment include="Development">

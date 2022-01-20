@@ -104,7 +104,8 @@ namespace WebClient.Services.Implements
                 IdNhanVien = viewModal.IdNVKyThuat,
                 IdPhieuBaoHong = viewModal.Id,
                 IdTrangThaiPhieu = 3,
-                ThoiGian = DateTime.Now
+                ThoiGian = DateTime.Now,
+                MoTa = viewModal.MoTa
             };
             await this.unitOfWork.BaoHongRepository.AddAsync(chitiet);
             this.unitOfWork.Commit();
@@ -141,6 +142,11 @@ namespace WebClient.Services.Implements
             baohong.NoiDungDanhGia = danhGiaVM.NoiDungDanhGia;
             await this.unitOfWork.BaoHongRepository.UpdateAsync(baohong);
             this.unitOfWork.Commit();
+        }
+
+        public async Task<KhachHang> GetKhachHang(int v)
+        {
+            return await this.unitOfWork.BaoHongRepository.GetKhachHang(v);
         }
     }
 }

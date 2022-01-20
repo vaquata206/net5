@@ -12,5 +12,6 @@ namespace WebClient.Core.Entities
         public int IdTrangThaiPhieu { get; set; }
         public DateTime ThoiGian { get; set; }
         public int IdNhanVien { get; set; }
+        public string MoTa { get; set; }
     }
 }

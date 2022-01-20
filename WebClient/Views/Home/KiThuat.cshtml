@@ -137,9 +137,6 @@
                     <div class="card-header">
                         <h3 class="card-title">Danh sách</h3>
                         <div class="float-right card-tools">
-                            <a id="btn-add-duan" href="/baohong/chitiet" class="btn btn-success btn-sm">
-                                <i class="fa fa-plus"></i>
-                            </a>
                             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                                 <i class="fas fa-minus"></i>
                             </button>
@@ -222,7 +219,15 @@
                                     },
                                     {
                                         "title": "Trạng thái",
-                                        "data": "trangThai"
+                                        "data": "trangThai",
+                                        "render": function (data, type, full, meta) {
+                                            switch (full.idTrangThaiPhieu) {
+                                                case 1: return '<span class="badge badge-light">' + full.trangThai + '</span>'; break;
+                                                case 2: return '<span class="badge badge-warning">' + full.trangThai + '</span>'; break;
+                                                case 3: return '<span class="badge badge-danger">' + full.trangThai + '</span>'; break;
+                                                case 4: return '<span class="badge badge-success">' + full.trangThai + '</span>'; break;
+                                            }
+                                        }
                                     },
                                     {
                                         "title": "Ngày HT",
@@ -243,6 +248,17 @@
                                             }
 
                                             return '';
+                                        }
+                                    },
+                                    {
+                                        "title": "Đúng hạn",
+                                        "render": function (data, type, full, meta) {
+                                            if (full.tinhTrang == 1) {
+                                                return '<span class="badge badge-success">Đúng hạn</span>';
+                                            } else if (full.tinhTrang == 2) {
+                                                return '<span class="badge badge-danger">Trể hạn</span>';
+                                            }
+                                            return "";
                                         }
                                     },
                                     {

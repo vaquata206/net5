@@ -39,10 +39,18 @@ namespace WebClient.Controllers
             }
             else
             {
-                return Redirect("/home/quantri");
+                if (this.BaseContext.Account.IdVaiTro == 1)
+                {
+                    return Redirect("/kithuat");
+                }
+                else
+                {
+                    return Redirect("/tiepnhan");
+                }
             }
         }
 
+        [Route("/tiepnhan")]
         public async Task<IActionResult> QuanTri()
         {
             var trangThai = await this.baoHongService.GetTrangThai();
@@ -50,6 +58,7 @@ namespace WebClient.Controllers
             return View();
         }
 
+        [Route("/kithuat")]
         public async Task<IActionResult> KiThuat()
         {
             var trangThai = await this.baoHongService.GetTrangThai();

@@ -64,6 +64,18 @@ namespace WebClient.Repositories.Implements
                 );
         }
 
+        public async Task<KhachHang> GetKhachHang(int id)
+        {
+            var sql = "SELECT * FROM KHACHHANG WHERE ID = @id";
+            return await this.dbContext.QueryFirstOrDefaultAsync<KhachHang>(
+                sql: sql,
+                param: new
+                {
+                    id
+                }
+                );
+        }
+
 
         public async Task<IEnumerable<BaoHongInfo>> SearchAsync(BaoHongSearch search)
         {
