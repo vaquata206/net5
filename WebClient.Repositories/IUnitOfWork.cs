@@ -6,17 +6,13 @@ namespace WebClient.Repositories
     public interface IUnitOfWork : IDisposable
     {
         IAccountRepository AccountRepository { get; }
-        IDepartmentRepository DepartmentRepository { get; }
+        IDonViRepository DepartmentRepository { get; }
         IFeatureRepository FeatureRepository { get; }
-        IEmployeeRepository EmployeeRepository { get; }
+        INhanVienRepository NhanVienRepository { get; }
         IPermissionRepository PermissionRepository { get; }
         IPermissionFeatureRepository PermissionFeatureRepository { get; }
         IEmployeePermissionRepository EmployeePermissionRepository { get; }
-        IDangKyTiemVaccineRepository DangKyTiemVaccineRepository { get; }
-        IDotTiemVaccineRepository DotTiemVaccineRepository { get; }
-        ILichSuTiemVaccineRepository LichSuTiemVaccineRepository { get; }
-        IDmDoiTuongUuTienRepository DmDoiTuongUuTienRepository { get; }
-        IDmDanTocRepository DmDanTocRepository { get; }
+        IBaoHongRepository BaoHongRepository { get; }
         void Commit();
         void Rollback();
     }

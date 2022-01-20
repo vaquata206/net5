@@ -1,0 +1,177 @@
+/*
+ CSS for the main interaction
+*/
+.tabset > input[type="radio"] {
+  position: absolute;
+  left: -200vw;
+}
+
+.tabset .tab-panel {
+}
+
+.tabset > input:first-child:checked ~ .tab-panels > .tab-panel:first-child,
+.tabset > input:nth-child(3):checked ~ .tab-panels > .tab-panel:nth-child(2),
+.tabset > input:nth-child(5):checked ~ .tab-panels > .tab-panel:nth-child(3),
+.tabset > input:nth-child(7):checked ~ .tab-panels > .tab-panel:nth-child(4),
+.tabset > input:nth-child(9):checked ~ .tab-panels > .tab-panel:nth-child(5),
+.tabset > input:nth-child(11):checked ~ .tab-panels > .tab-panel:nth-child(6) {
+  display: block;
+}
+
+/*
+ Styling
+*/
+body {
+  font: 14px/1.5em "Overpass", "Open Sans", Helvetica, sans-serif;
+  color: #333;
+  font-weight: 300;
+
+}
+
+.tabset > label {
+  position: relative;
+  color: #fff;
+  text-align: center;
+  display: inline-block;
+  padding: 10px 15px 10px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  cursor: pointer;
+  font-weight: 600;
+  width: 32.5%;
+    background: -webkit-linear-gradient(45deg, #3ac5c8 1%, #0b509e 100%);
+    background: linear-gradient(45deg, #a0a09f 1%, #a0a09f 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#3ac5c8', endColorstr='#0b509e', GradientType=1);
+}
+}
+
+.tabset > label::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  bottom: 10px;
+  width: 22px;
+  height: 4px;
+  background: #8d8d8d;
+}
+
+.tabset > label:hover,
+.tabset > input:focus + label {
+  color: #fff;
+  background: -webkit-linear-gradient(45deg, #3ac5c8 1%, #0b509e 100%);
+    background: linear-gradient(45deg, #3ac5c8 1%, #0b509e 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#3ac5c8', endColorstr='#0b509e', GradientType=1);
+}
+
+.tabset > label:hover::after,
+.tabset > input:focus + label::after,
+.tabset > input:checked + label::after {
+  background: #06c;
+}
+
+.tabset > input:checked + label {
+  border-color: #e74141;
+    border-bottom: 1px solid #fff;
+    margin-bottom: -1px;
+    background: #e74141;
+    color: #fff;
+}
+
+.tab-panel {
+  padding: 5px 0;
+  border-top: 1px solid #ccc;
+}
+
+/*
+ Demo purposes only
+*/
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+.page-tabs .nav-link.active {
+    background-color: #e02d2d;
+}
+
+@media (max-width: 991px) .page-tabs .nav-link {
+    font-size: 14px;
+    padding: 8px 6px 5px;
+}
+
+.page-tabs .nav-link {
+    display: block;
+    font-size: 18px;
+    color: #fff;
+    background-color: #a0a09f;
+    text-align: center;
+    padding: 8px 10px 5px;
+    -webkit-transition: .3s;
+    transition: .3s;
+    margin: 1px;
+}
+
+.page-tabs .nav-link:hover {
+    color: #fff;
+    background: -webkit-linear-gradient(45deg, #3ac5c8 1%, #0b509e 100%);
+    background: linear-gradient(45deg, #3ac5c8 1%, #0b509e 100%);
+    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#3ac5c8', endColorstr='#0b509e', GradientType=1);
+}
+
+
+.nav-link {
+    display: block;
+    padding: .5rem 1rem;
+}
+
+a {
+    text-decoration: none;
+    background-color: transparent;
+}
+
+*, ::after, ::before {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+user agent stylesheet
+a:-webkit-any-link {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+user agent stylesheet
+li {
+    text-align: -webkit-match-parent;
+}
+
+.nav {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+user agent stylesheet
+ul {
+    list-style-type: disc;
+}
+
+.row .input-group {
+    float: left;
+}
+
+.input-group-btn .btn {
+    border-radius: 0px;
+}
+ .form-control {
+    margin-left: 15px;
+}
+
+

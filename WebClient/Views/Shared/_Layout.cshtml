@@ -1,12 +1,18 @@
 ﻿@using System.Linq;
 @using WebClient.ViewModels;
 @using Newtonsoft.Json;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedLocalizations> localizer
+@{
+
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>VACCINE | @ViewData["Title"]</title>
+    <title>@ViewData["Title"]</title>
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Ionicons -->
@@ -48,10 +54,6 @@
 </head>
 <body class="sidebar-mini-md sidebar-mini-xs sidebar-mini text-sm">
     @{
-        if (AppSetting.Enviroment != "production")
-        {
-        <span class="mark-enviroment-sys">@AppSetting.Enviroment</span>
-        }
         var baseContext = contextFactory.GetInstance();
 
         var menu = baseContext.Menu.Where(x => x.Show);
@@ -72,7 +74,7 @@
                     <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                 </li>
                 <li class="nav-item d-none d-sm-inline-block">
-                    <a href="#" class="nav-link font-weight-bold text-uppercase">@baseContext.Account.DepartmentName</a>
+                    <a href="#" class="nav-link font-weight-bold text-uppercase">TTCNTT - VNPT ĐÀ NẴNG</a>
                 </li>
             </ul>
 
@@ -82,20 +84,17 @@
                 <li class="nav-item dropdown user-menu">
                     <a class="nav-link" data-toggle="dropdown" href="#">
                         <img width="25" src="/dist/img/user.png" class="profile-image img-circle" alt="Ảnh đại diện">
-                        <span class="hidden-xs">@baseContext.Account.UserName</span>
+                        <span class="hidden-xs">@baseContext.Account.TenTaiKhoan</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
                         <div class="user-header">
                             <p>
-                                @baseContext.Account.EmployeeName
-                                <strong style="display:block">
-                                    @baseContext.Account.DepartmentName
-                                </strong>
+                                @baseContext.Account.HoTen
                             </p>
                         </div>
                         <div class="user-footer">
                             <div class="float-left">
-                                <a href="/account/profile" class="btn btn-default btn-flat">Hồ sơ</a>
+                                <a href="/" class="btn btn-default btn-flat">Hồ sơ</a>
                             </div>
                             <div class="float-right">
                                 <a href="/logout" class="btn btn-default btn-flat">Đăng xuất</a>
@@ -109,9 +108,9 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="/" class="brand-link" style="background-color: #1f7ed0; color:azure;">
+            <a href="/" class="brand-link" style="background-color: #ffffff; color: #1f7ed0;">
                 <img src="/dist/img/logovnpt.png" alt="Ban quản lý dự án" class="brand-image">
-                <span class="brand-text font-weight-bold">VNPT</span>
+                <span class="brand-text font-weight-bold">VNPT Đà Nẵng</span>
             </a>
 
             <!-- Sidebar -->
@@ -120,10 +119,10 @@
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column nav-flat nav-legacy" data-widget="treeview" role="menu" data-accordion="false">
                         <li class="nav-item">
-                            <a href="/" class="nav-link @((controller == "home" && action == "index")? "active": string.Empty)">
+                            <a href="/admin" class="nav-link @((controller == "home" && action == "index")? "active": string.Empty)">
                                 <i class="nav-icon fa fa-home"></i>
                                 <p>
-                                    Trang chủ
+                                    @localizer["Trang chủ"]
                                 </p>
                             </a>
                         </li>
@@ -131,10 +130,10 @@
                         @{
                             foreach (var m in menu.Where(x => x.ParentId == 0))
                             {
-                            @await Html.PartialAsync("_MenuItem", m, new ViewDataDictionary(this.ViewData) {
-                               { "menu", menu },
-                               { "controllerActive", controller },
-                               { "actionActive", action }})
+                                @await Html.PartialAsync("_MenuItem", m, new ViewDataDictionary(this.ViewData) {
+                                   { "menu", menu },
+                                   { "controllerActive", controller },
+                                   { "actionActive", action }})
                             }
                         }
                         <!--<li class="nav-header">EXAMPLES</li>-->
@@ -185,7 +184,7 @@
         </div>
         <!-- /.content-wrapper -->
         <footer class="main-footer">
-            <strong>Copyright &copy; 2014-2020 <a href="https://danang.vnpt.vn/">VNPT Đà Nẵng</a>.</strong>
+            <strong>Copyright &copy; 2021-2022 <a href="https://danang.vnpt.vn/">Xây dựng bởi Trung tâm công nghệ thông tin - VNPT Đà Nẵng</a>.</strong>
             All rights reserved.
             <div class="float-right d-none d-sm-inline-block">
                 <b>Version</b> @AppSetting.Version
@@ -199,9 +198,9 @@
                 try
                 {
                     var alert = JsonConvert.DeserializeObject<Alert>(TempData["StatusMessage"].ToString());
-            <div class="alerts-system">
-                <span data-type="@alert.Type" data-timer="@alert.Timer">@alert.Title</span>
-            </div>
+                    <div class="alerts-system" style="display: none;">
+                        <span data-type="@alert.Type" data-timer="@alert.Timer">@alert.Title</span>
+                    </div>
                 }
                 catch (Exception) { }
             }
@@ -215,9 +214,7 @@
         <!-- jQuery UI 1.11.4 -->
         <script src="/node_modules/admin-lte/plugins/jquery-ui/jquery-ui.min.js"></script>
         <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-        <script>
-            $.widget.bridge('uibutton', $.ui.button)
-        </script>
+        <script>$.widget.bridge('uibutton', $.ui.button)</script>
         <!-- Bootstrap 4 -->
         <script src="/node_modules/admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
         <!-- ChartJS -->
@@ -252,10 +249,17 @@
         <script src="/node_modules/admin-lte/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
         <script src="/node_modules/admin-lte/plugins/datatables-select/js/dataTables.select.min.js"></script>
         <script src="/node_modules/admin-lte/plugins/datatables-select/js/select.bootstrap4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.html5.min.js"></script>
+        <script src="https://cdn.datatables.net/buttons/2.1.0/js/buttons.print.min.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="/js/main.min.js?v=@AppSetting.ResourceVersion"></script>
     </environment>
+    <!-- Ckeditor4-->
+    <script src="/node_modules/ckeditor4/ckeditor.js"></script>
     <script src="/js/site.js?v=@AppSetting.ResourceVersion"></script>
     <script src="/js/ValidateAuto.js?v=@AppSetting.ResourceVersion"></script>
     @RenderSection("Scripts", required: false)

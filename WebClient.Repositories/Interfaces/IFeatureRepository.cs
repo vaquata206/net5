@@ -7,18 +7,12 @@ namespace WebClient.Repositories.Interfaces
     public interface IFeatureRepository : IBaseRepository<Feature>
     {
         /// <summary>
-        /// Get all features of the user
-        /// </summary>
-        /// <param name="userId">user id</param>
-        /// <returns>A feature list</returns>
-        Task<IEnumerable<Feature>> GetFeaturesUser(int userId);
-
-        /// <summary>
         /// Gets all featuress
         /// </summary>
         /// <returns>A list feature</returns>
         Task<IEnumerable<Feature>> GetAllAsync();
 
+        Task CapNhatThuTuChucNang(int idCha, int stt);
         /// <summary>
         /// Id of the feature that will be deleted
         /// </summary>

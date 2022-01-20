@@ -18,19 +18,9 @@ namespace WebClient.Extensions
         public const string UserId = "UserId";
 
         /// <summary>
-        /// User code
-        /// </summary>
-        public const string UserCode = ClaimTypes.Surname;
-
-        /// <summary>
-        /// Employee id
-        /// </summary>
-        public const string EmployeeId = "EmployeeId";
-
-        /// <summary>
         /// Employee Name
         /// </summary>
-        public const string EmployeeName = ClaimTypes.Name;
+        public const string FullName = ClaimTypes.Name;
 
         /// <summary>
         /// Department id
@@ -42,9 +32,30 @@ namespace WebClient.Extensions
         /// </summary>
         public const string DepartmentName = "DepartmentName";
 
+
         /// <summary>
-        /// Position id
+        /// AccountType
         /// </summary>
-        public const string PositionId = "PositionId";
+        public const string AccountType = "AccountType";
+
+        /// <summary>
+        /// Investor id
+        /// </summary>
+        public const string CustomerId = "CustomerId";
+
+        /// <summary>
+        /// Employee id
+        /// </summary>
+        public const string EmployeeId = "EmployeeId";
+
+        /// <summary>
+        /// Status 
+        /// </summary>
+        public const string Status = "Status";
+
+        /// <summary>
+        /// LoginType 
+        /// </summary>
+        public const string RoleType = "RoleType";
     }
 }

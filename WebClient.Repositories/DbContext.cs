@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using Oracle.ManagedDataAccess.Client;
 
 namespace WebClient.Repositories
 {
@@ -14,7 +14,7 @@ namespace WebClient.Repositories
         private IDbTransaction dbTransaction;
         public DbContext(string connectionString)
         {
-            this.dbConnection = new OracleConnection(connectionString);
+            this.dbConnection = new SqlConnection(connectionString);
             this.dbConnection.Open();
         }
 
@@ -45,6 +45,21 @@ namespace WebClient.Repositories
         public async Task<int> ExecuteAsync(string sql, object param = null, CommandType? commandType = null)
         {
             return await this.dbConnection.ExecuteAsync(sql: sql, param: param, transaction: this.DbTransaction, commandType: commandType ?? CommandType.Text);
+        }
+
+        public async Task InsertAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            await this.dbConnection.InsertAsync(entity, transaction: this.DbTransaction);
+        }
+
+        public async Task UpdateAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            await this.dbConnection.UpdateAsync(entity, transaction: this.DbTransaction);
+        }
+
+        public async Task DeleteAsync<TEntity>(TEntity entity) where TEntity : class
+        {
+            await this.dbConnection.DeleteAsync(entity, transaction: this.DbTransaction);
         }
 
         private bool disposed = false;

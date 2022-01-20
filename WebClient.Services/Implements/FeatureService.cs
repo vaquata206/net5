@@ -22,10 +22,26 @@ namespace WebClient.Services.Implements
         /// <summary>
         /// Get menu of a account
         /// </summary>
-        /// <param name="userId">user id</param>
+        /// <param name="account">Account info</param>
         /// <returns>A feature list</returns>
-        public async Task<IEnumerable<Menu>> GetMenuAsync(int userId) {
-            var list = await this.unitOfWork.FeatureRepository.GetFeaturesUser(userId);
+        public IEnumerable<Menu> GetMenuAsync(AccountInfo account) {
+            IEnumerable<Feature> list;
+            if (account.IsKhachHang)
+            {
+                list = new List<Feature>();
+            }
+            else
+            {
+                if (account.IdVaiTro == 1)
+                {
+                    list = new List<Feature>();
+                }
+                else
+                {
+                    list = new List<Feature>();
+                }
+            }
+
             return this.FeaturesToArrayMenu(0, list);
         }
 
@@ -45,39 +61,41 @@ namespace WebClient.Services.Implements
         /// </summary>
         /// <param name="featureVM">The feature</param>
         /// <returns>A task</returns>
-        public async Task SaveFeatureAsync(FeatureVM featureVM)
+        public async Task SaveFeatureAsync(FeatureVM featureVM, int handler)
         {
             try
             {
-                if (featureVM.ID_CN.HasValue && featureVM.ID_CN.Value != 0)
+                if (featureVM.Id.HasValue && featureVM.Id.Value != 0)
                 {
                     // Edit
-                    var entity = await this.unitOfWork.FeatureRepository.GetByIdAsync(featureVM.ID_CN.Value, false);
+                    var entity = await this.unitOfWork.FeatureRepository.GetByIdAsync(featureVM.Id.Value, false);
                     if (entity == null)
                     {
                         throw new Exception("Chức năng này không tồn tại");
                     }
 
-                    entity.Action_Name = featureVM.Action_Name;
-                    entity.Controller_Name = featureVM.Controller_Name;
-                    entity.Id_ChucNang_Cha = featureVM.ID_CN_PR ?? 0;
-                    entity.Ten_ChucNang = featureVM.Ten_CN;
-                    entity.Tooltip = featureVM.ToolTip_CN;
-                    entity.MoTa_ChucNang = featureVM.Mota_CN;
-                    entity.Action_Name = featureVM.Action_Name;
-                    entity.HienThi_Menu = featureVM.HienThi_Menu ? 1 : 0;
-
+                    entity.ActionName = featureVM.ActionName;
+                    entity.ControllerName = featureVM.ControllerName;
+                    entity.IdCha = featureVM.IdCha ?? 0;
+                    entity.TenChucNang = featureVM.TenChucNang;
+                    entity.MoTa = featureVM.Mota;
+                    entity.ActionName = featureVM.ActionName;
+                    entity.Url = featureVM.Url;
+                    entity.HienThi = featureVM.HienThi ? 1 : 0;
+                    entity.KichHoat = featureVM.KichHoat ? 1 : 0;
+                    entity.NgayCapNhat = DateTime.Now;
+                    entity.NguoiCapNhat = handler;
                     await this.unitOfWork.FeatureRepository.UpdateAsync(entity);
                 }
                 else
                 {
-                    var idCha = featureVM.ID_CN_PR ?? 0;
+                    var idCha = featureVM.IdCha ?? 0;
                     var thuTuCan = 0;
                     var dsChucNang = await this.GetAllAsync();
-                    var chucNangCha = dsChucNang.Where(obj => obj.Id_ChucNang == idCha).FirstOrDefault();
+                    var chucNangCha = dsChucNang.Where(obj => obj.Id == idCha).FirstOrDefault();
                     if (chucNangCha != null)
                     {
-                        thuTuCan = chucNangCha.Children == null ? 1 : chucNangCha.Children.OrderBy(x => x.Thu_Tu).Last().Thu_Tu + 1;
+                        thuTuCan = chucNangCha.Children == null ? 1 : chucNangCha.Children.OrderBy(x => x.ThuTu).Last().ThuTu + 1;
                     }
                     else
                     {
@@ -86,23 +104,25 @@ namespace WebClient.Services.Implements
 
                     var entity = new Feature
                     {
-                        Ten_ChucNang = featureVM.Ten_CN,
-                        Ma_ChucNang = "CN" + string.Format("{0:yyyyMMddhhmmss}", DateTime.Now),
-                        Tooltip = featureVM.ToolTip_CN,
-                        MoTa_ChucNang = featureVM.Mota_CN,
-                        Controller_Name = featureVM.Controller_Name,
-                        Action_Name = featureVM.Action_Name,
-                        Id_ChucNang_Cha = featureVM.ID_CN_PR ?? 0,
-                        Thu_Tu = thuTuCan,
-                        Tinh_Trang = 1,
-                        Id_ChuongTrinh = 1,
-                        HienThi_Menu = featureVM.HienThi_Menu ? Constants.States.Actived.GetHashCode() : Constants.States.Disabed.GetHashCode()
+                        TenChucNang = featureVM.TenChucNang,
+                        MoTa = featureVM.Mota,
+                        ThuTu = thuTuCan,
+                        ControllerName = featureVM.ControllerName,
+                        ActionName = featureVM.ActionName,
+                        IdCha = featureVM.IdCha ?? 0,
+                        Url = featureVM.Url,
+                        DaXoa = false,
+                        HienThi = featureVM.HienThi? Constants.States.Actived.GetHashCode() : Constants.States.Disabed.GetHashCode(),
+                        KichHoat = featureVM.KichHoat ? Constants.States.Actived.GetHashCode() : Constants.States.Disabed.GetHashCode(),
+                        NgayKhoiTao = DateTime.Now,
+                        NguoiKhoiTao = handler
+
                     };
                     await this.unitOfWork.FeatureRepository.AddAsync(entity);
                 }
                 this.unitOfWork.Commit();
             }
-            catch (Exception)
+            catch (Exception )
             {
                 throw;
             }
@@ -113,7 +133,7 @@ namespace WebClient.Services.Implements
         /// </summary>
         /// <param name="featureId">Id of feature</param>
         /// <returns>A Task</returns>
-        public async Task DeleteFeatureAsync(int featureId)
+        public async Task DeleteFeatureAsync(int featureId, int handler)
         {
             var feature = await this.unitOfWork.FeatureRepository.GetByIdAsync(featureId, false);
             if (feature == null)
@@ -121,7 +141,11 @@ namespace WebClient.Services.Implements
                 throw new Exception("Chức năng này không tồn tại");
             }
 
-            await this.unitOfWork.FeatureRepository.DeleteFeatureAsync(featureId);
+            feature.DaXoa = true;
+            feature.NgayCapNhat = DateTime.Now;
+            feature.NguoiCapNhat = handler;
+            await this.unitOfWork.FeatureRepository.UpdateAsync(feature);
+            await this.unitOfWork.FeatureRepository.CapNhatThuTuChucNang(feature.IdCha, feature.ThuTu);
             this.unitOfWork.Commit();
         }
 
@@ -134,21 +158,22 @@ namespace WebClient.Services.Implements
         private IEnumerable<Menu> FeaturesToArrayMenu(int parentId, IEnumerable<Feature> features)
         {
             var list = Enumerable.Empty<Menu>();
-            var children = features.Where(x => x.Id_ChucNang_Cha == parentId).OrderBy(x => x.Thu_Tu);
+            var children = features.Where(x => x.IdCha == parentId).OrderBy(x => x.ThuTu);
             foreach (var i in children)
             {
                 list = list.Append(new Menu
                 {
-                    Id = i.Id_ChucNang,
-                    ParentId = (i.Id_ChucNang_Cha != 0) ? i.Id_ChucNang_Cha : 0,
-                    Controler = i.Controller_Name?.ToLower(),
-                    Action = i.Action_Name?.ToLower(),
-                    Name = i.Ten_ChucNang,
-                    Show = i.HienThi_Menu == 1,
+                    Id = i.Id,
+                    ParentId = (i.IdCha != 0) ? i.IdCha : 0,
+                    Controler = i.ControllerName?.ToLower(),
+                    Action = i.ActionName?.ToLower(),
+                    Name = i.TenChucNang,
+                    Show = i.HienThi == 1,
+                    Url = i.Url,
                     Icon = i.Icon
                 });
 
-                list = list.Concat(this.FeaturesToArrayMenu(i.Id_ChucNang, features));
+                list = list.Concat(this.FeaturesToArrayMenu(i.Id, features));
             }
 
             return list;
@@ -164,19 +189,19 @@ namespace WebClient.Services.Implements
             if (list != null && list.Any())
             {
                 // groups features by Id feature parent
-                var groupFeatures = list.GroupBy(x => x.Id_ChucNang_Cha);
+                var groupFeatures = list.GroupBy(x => x.IdCha);
 
                 foreach (var gr in groupFeatures)
                 {
-                    var fr = list.FirstOrDefault(y => y.Id_ChucNang == gr.Key);
+                    var fr = list.FirstOrDefault(y => y.Id == gr.Key);
                     if (fr != null)
                     {
-                        fr.Children = gr.OrderBy(y => y.Thu_Tu);
+                        fr.Children = gr.OrderBy(y => y.ThuTu);
                     }
                 };
 
                 // Gets root features that has ID_CN_PR = 0
-                list = groupFeatures.Where(x => x.Key == 0).SelectMany(x => x).OrderBy(x => x.Thu_Tu);
+                list = groupFeatures.Where(x => x.Key == 0).SelectMany(x => x).OrderBy(x => x.ThuTu);
             }
 
             return list;
@@ -190,20 +215,30 @@ namespace WebClient.Services.Implements
         public async Task<IEnumerable<TreeNode>> GetTreeNodeFeaturesOfAccount(int accountId)
         {
             var result = Enumerable.Empty<TreeNode>();
-            var fp = await this.unitOfWork.FeatureRepository.GetFeaturesOfPermissionsByAccountId(accountId);
-            var fe = await this.unitOfWork.FeatureRepository.GetFeaturesNotBelongPermissionsByAccountId(accountId);
+            var fp = Enumerable.Empty<Feature>();
+            var fe = Enumerable.Empty<Feature>();
+            var account = await this.unitOfWork.AccountRepository.GetByIdAsync(accountId);
+            if (true)
+            {
+                fp = await this.unitOfWork.FeatureRepository.GetAllAsync();
+            }
+            else
+            {
+                fp = await this.unitOfWork.FeatureRepository.GetFeaturesOfPermissionsByAccountId(accountId);
+                fe = await this.unitOfWork.FeatureRepository.GetFeaturesNotBelongPermissionsByAccountId(accountId);
+            }
 
             // feature list belong the employee's permissions
             result = fp.Select(x => new TreeNode
             {
-                Id = x.Id_ChucNang.ToString(),
+                Id = x.Id.ToString(),
                 TypeNode = "P"
             });
 
             // feature list expand to the employee
             result = result.Concat(fe.Select(x => new TreeNode
             {
-                Id = x.Id_ChucNang.ToString(),
+                Id = x.Id.ToString(),
                 TypeNode = "E"
             }));
 

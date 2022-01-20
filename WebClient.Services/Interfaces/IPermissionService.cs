@@ -11,8 +11,9 @@ namespace WebClient.Services.Interfaces
         /// Add a permission
         /// </summary>
         /// <param name="permission">The permission</param>
+        /// <param name="userId">user id</param>
         /// <returns>A task</returns>
-        Task<Permission> SaveAsync(PermissionVM permission);
+        Task<Permission> SaveAsync(PermissionVM permission, int userId);
 
         /// <summary>
         /// Get the permission by id
@@ -31,8 +32,9 @@ namespace WebClient.Services.Interfaces
         /// Delete a permission
         /// </summary>
         /// <param name="permissionId">Id of permission</param>
+        /// <param name="userId">user id</param>
         /// <returns>A task</returns>
-        Task DeleteAsync(int permissionId);
+        Task DeleteAsync(int permissionId, int userId);
 
         /// <summary>
         /// Sets departments that the account is avaiabled work

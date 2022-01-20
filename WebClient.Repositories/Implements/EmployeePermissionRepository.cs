@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Dapper;
-using Oracle.ManagedDataAccess.Client;
 using WebClient.Core.Entities;
 using WebClient.Repositories.Interfaces;
+using System.Linq;
+using WebClient.Core.Helpers;
 
 namespace WebClient.Repositories.Implements
 {
-    public class EmployeePermissionRepository : BaseRepository<Employee_Permission>, IEmployeePermissionRepository
+    public class EmployeePermissionRepository : BaseRepository<PhanQuyen>, IEmployeePermissionRepository
     {
         public EmployeePermissionRepository(DbContext dbContext) : base(dbContext)
         {
@@ -23,18 +23,45 @@ namespace WebClient.Repositories.Implements
         /// <returns></returns>
         public async Task SetPermissionsForUser(IEnumerable<int> ids, int userId, int handler)
         {
+            var dsIdQuyenHienTai = await this.GetIdPermissionsOfUser(userId);
+            var dsIdQuyenInsert = ids.Except(dsIdQuyenHienTai);
+            var dsIdQuyenDelete = dsIdQuyenHienTai.Except(ids);
+
+            await this.SetPermissionListForUser(dsIdQuyenInsert, userId, handler);
+            await this.DeletePermissionsForUser(dsIdQuyenDelete, userId, handler);
+        }
+
+        /// <summary>
+        /// Set permission list for a user
+        /// </summary>
+        /// <param name="idsQuyen"></param>
+        /// <param name="userId"></param>
+        /// <param name="handler"></param>
+        /// <returns></returns>
+        private async Task SetPermissionListForUser(IEnumerable<int> idsQuyen, int userId, int handler)
+        {
             try
             {
-                var dyParam = new OracleDynamicParameters();
-                dyParam.Add("P_IDS", OracleDbType.Varchar2, ParameterDirection.Input, string.Join(",", ids));
-                dyParam.Add("P_ID_ND", OracleDbType.Int64, ParameterDirection.Input, userId);
-                dyParam.Add("P_ID_NV_TT", OracleDbType.Int64, ParameterDirection.Input, handler);
-                await this.dbContext.ExecuteAsync(
-                    sql: "ADMIN_NHANVIEN_QUYEN.SET_PERMISSIONS",
-                    param: dyParam,
-                    commandType: CommandType.StoredProcedure);
+                //todo
+            } catch (Exception)
+            {
+                throw;
             }
-            catch (Exception)
+        }
+
+        /// <summary>
+        /// Delete permission list for a user
+        /// </summary>
+        /// <param name="idsQuyen"></param>
+        /// <param name="userId"></param>
+        /// <param name="handler"></param>
+        /// <returns></returns>
+        private async Task DeletePermissionsForUser(IEnumerable<int> idsQuyen, int userId, int handler)
+        {
+            try
+            {
+                //todo
+            } catch (Exception)
             {
                 throw;
             }
@@ -47,27 +74,32 @@ namespace WebClient.Repositories.Implements
         /// <returns>permission ids</returns>
         public async Task<IEnumerable<int>> GetIdPermissionsOfUser(int userId)
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("P_ID_ND", OracleDbType.Int64, ParameterDirection.Input, userId);
-            dyParam.Add("RSOUT", OracleDbType.RefCursor, ParameterDirection.Output);
-            return await this.dbContext.QueryAsync<int>(
-                sql: "ADMIN_NHANVIEN_QUYEN.GET_PERMISSIONIDS_OF_USER",
-                param: dyParam,
-                commandType: CommandType.StoredProcedure);
+            var sql = @"Select IdQuyen From PhanQuyen Where DaXoa = 0 And IdTaiKhoan = @userId And IdQuyen is not NULL";
+            var param = new
+            {
+                userId = userId
+            };
+            var dsQuyen = await this.dbContext.QueryAsync<int>(
+                sql: sql,
+                param: param,
+                commandType: CommandType.Text);
+            return dsQuyen;
         }
 
-        public async Task SetFeaturesForEmployee(IEnumerable<int> ids, int idEmployee, int idUser)
+        /// <summary>
+        /// Set feature list for a user
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <param name="idUser"></param>
+        /// <returns></returns>
+        public async Task SetFeaturesForEmployee(IEnumerable<int> idsInsert, IEnumerable<Feature> idsDelete, int idUser, int handle)
         {
             try
             {
-                var query = "ADMIN_NHANVIEN_QUYEN.SET_FEATURES";
-                var dyParam = new OracleDynamicParameters();
-                dyParam.Add("P_ID_CNS", OracleDbType.Varchar2, ParameterDirection.Input, string.Join(",", ids));
-                dyParam.Add("P_ID_NV", OracleDbType.Int64, ParameterDirection.Input, idEmployee);
-                dyParam.Add("P_ID_USER", OracleDbType.Int64, ParameterDirection.Input, idUser);
-                await this.dbContext.ExecuteAsync(query, param: dyParam, commandType: CommandType.StoredProcedure);
+                // insert ChucNang 
+                //TODO
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw;
             }

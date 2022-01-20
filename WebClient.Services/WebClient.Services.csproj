@@ -6,10 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
 	<PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.8" />
+	<PackageReference Include="Nancy" Version="2.0.0" />
 	<PackageReference Include="NPOI" Version="2.5.3" />
     <ProjectReference Include="..\WebClient.Repositories\WebClient.Repositories.csproj" />
   </ItemGroup>

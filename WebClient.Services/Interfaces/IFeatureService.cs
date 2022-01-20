@@ -14,9 +14,9 @@ namespace WebClient.Services.Interfaces
         /// <summary>
         /// Get menu of a account
         /// </summary>
-        /// <param name="userId">user id</param>
+        /// <param name="account">Account info</param>
         /// <returns>A feature list</returns>
-        Task<IEnumerable<Menu>> GetMenuAsync(int userId);
+        IEnumerable<Menu> GetMenuAsync(AccountInfo account);
 
         /// <summary>
         /// Gets all featuress
@@ -29,14 +29,14 @@ namespace WebClient.Services.Interfaces
         /// </summary>
         /// <param name="feature">The feature</param>
         /// <returns>A task</returns>
-        Task SaveFeatureAsync(FeatureVM feature);
+        Task SaveFeatureAsync(FeatureVM feature, int handler);
 
         /// <summary>
         /// Id of the feature that will be deleted
         /// </summary>
         /// <param name="featureId">Id of feature</param>
         /// <returns>A Task</returns>
-        Task DeleteFeatureAsync(int featureId);
+        Task DeleteFeatureAsync(int featureId, int handler);
 
         /// <summary>
         /// get tree node features by id of account

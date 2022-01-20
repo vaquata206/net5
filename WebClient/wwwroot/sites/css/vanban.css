@@ -1,0 +1,54 @@
+/*
+ CSS for VanBan of NhaDauTu
+*/
+
+div#search_panel, div#titleView, div#tableId {
+    position: relative;
+    width: 100%;
+}
+
+.col-form-label {
+    font-size: 16px;
+    line-height: 1.5em;
+}
+
+.form-control {
+    font-size: 14px;
+}
+
+.text-nowrap {
+    white-space: normal !important;
+}
+
+.pagination {
+    display: inline-flex;
+}
+
+.support-center {
+    padding: 0 !important;
+    border-left: 1px dotted #d5d5d5;
+    border-bottom: 1px dotted #d5d5d5;
+    border-top: 1px dotted #d5d5d5;
+    overflow: hidden;
+    background-color: #ffffff;
+    border-radius: 4px;
+    -webkit-box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    -moz-box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    position: relative;
+    margin-bottom: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.dataTables_wrapper {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    overflow-y: auto;
+}
+
+.formCoBan, .formNangcao {
+    padding: 15px;
+}

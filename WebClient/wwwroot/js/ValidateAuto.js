@@ -11,7 +11,7 @@
     equalTo: "Giá trị không khớp.",
     accept: "Please enter a value with a valid extension.",
     maxlength: jQuery.validator.format("Vui lòng nhập giá trị nhỏ hơn {0} ký tự."),
-    minlength: jQuery.validator.format("Please enter at least {0} characters."),
+    minlength: jQuery.validator.format("Vui lòng nhập ít nhất {0} ký tự."),
     rangelength: jQuery.validator.format("Please enter a value between {0} and {1} characters long."),
     range: jQuery.validator.format("Please enter a value between {0} and {1}."),
     max: jQuery.validator.format("Please enter a value less than or equal to {0}."),
@@ -25,6 +25,11 @@ jQuery.validator.addMethod("invoice_number", function (value, element) {
     var reg = /^\d{0,7}$/;
     return this.optional(element) || reg.test(value);
 }, 'Không đúng định dạng mã số');
+jQuery.validator.addMethod("testToaDo", function (value, element) {
+    var reg1 = /^\d*,?\d*$/;
+    var reg2 = /^\d*\.?\d*$/;
+    return this.optional(element) || reg1.test(value) || reg2.test(value);
+}, 'Không đúng định dạng kinh độ, vĩ độ');
 
 $(function () {
     var $forms = $("form[validate=true]");

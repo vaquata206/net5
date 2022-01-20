@@ -6,9 +6,9 @@ namespace WebClient.Repositories.Interfaces
     public interface IBaseRepository<TEntity>
     {
         Task<TEntity> GetByIdAsync(int id, bool checkTinhTrang = true);
-        Task<TEntity> AddAsync(TEntity entity);
-        Task UpdateAsync(TEntity entity);
-        Task<T> AddObjectAsync<T>(T entity);
-        Task UpdateObjectAsync<T>(T entity);
+        Task<T> AddAsync<T>(T entity) where T : class;
+        Task UpdateAsync<T>(T entity) where T : class;
+        Task DeleteAsync<T>(T entity) where T : class;
+        Task<string> TaoMa(string baseCode);
     }
 }

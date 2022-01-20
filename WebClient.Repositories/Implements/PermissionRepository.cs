@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Oracle.ManagedDataAccess.Client;
 using WebClient.Core.Entities;
+using WebClient.Core.Helpers;
 using WebClient.Repositories.Interfaces;
 
 namespace WebClient.Repositories.Implements
@@ -21,6 +21,7 @@ namespace WebClient.Repositories.Implements
         /// <returns>A task</returns>
         public async Task UpdatePermissionAsync(Permission permission)
         {
+            /*
             try
             {
                 var query = @"UPDATE Dm_Quyen SET TEN_QUYEN = :TenQuyen, GHI_CHU = :GhiChu WHERE Id_Quyen = :IdQuyen";
@@ -35,7 +36,8 @@ namespace WebClient.Repositories.Implements
             catch (Exception)
             {
                 throw;
-            }
+            }*/
+            // todo: cap nhat sau
         }
 
         /// <summary>
@@ -45,7 +47,7 @@ namespace WebClient.Repositories.Implements
         /// <returns>The permission</returns>
         public async Task<Permission> GetPermissionByIdAsync(int permissionId)
         {
-            var query = @"SELECT Id_Quyen, Ma_Quyen, Ten_Quyen, Tinh_Trang, Ghi_Chu FROM DM_Quyen WHERE Id_Quyen = :id";
+            var query = @"SELECT Id_Quyen, Ma_Quyen, Ten_Quyen, DaXoa, Ghi_Chu FROM DM_Quyen WHERE Id_Quyen = :id";
 
             var permission = await this.dbContext.QueryFirstOrDefaultAsync<Permission>(query, param: new
             {
@@ -61,31 +63,10 @@ namespace WebClient.Repositories.Implements
         /// <returns>List permission</returns>
         public async Task<IEnumerable<Permission>> GetPermissions()
         {
-            var query = @"SELECT Id_Quyen, Ma_Quyen, Ten_Quyen, Tinh_Trang, Ghi_Chu FROM DM_Quyen WHERE Tinh_Trang = 1";
+            var query = @"SELECT Id, TenQuyen, DaXoa, GhiChu FROM Quyen WHERE DaXoa = 0";
 
             var permissions = await this.dbContext.QueryAsync<Permission>(query, commandType: System.Data.CommandType.Text);
             return permissions;
-        }
-
-        /// <summary>
-        /// Delete list permission features by id permission and update permission with tinh_trang = 0 by id of permission
-        /// </summary>
-        /// <param name="permissionId">id of permission</param>
-        /// <returns>no reuturn</returns>
-        public async Task DeleteAsync(int permissionId)
-        {
-            try
-            {
-                var query = @"ADMIN_QUYEN.DELETE_QUYEN";
-                var dyParam = new OracleDynamicParameters();
-
-                dyParam.Add("P_ID_QUYEN", OracleDbType.Int64, ParameterDirection.Input, permissionId);
-                await this.dbContext.ExecuteAsync(query, param: dyParam, commandType: System.Data.CommandType.StoredProcedure);
-            }
-            catch (Exception)
-            {
-                throw;
-            }
         }
 
         /// <summary>
@@ -96,6 +77,7 @@ namespace WebClient.Repositories.Implements
         /// <param name="handlerId">Id of user who is performing this action</param>
         public async Task SetDepartmentsAsync(int accountId, int[] departmentIds, int handlerId)
         {
+            /*
             var dyParam = new OracleDynamicParameters();
             dyParam.Add("p_id_nd", OracleDbType.Int64, ParameterDirection.Input, accountId);
             if (departmentIds != null && departmentIds.Length > 0)
@@ -107,12 +89,35 @@ namespace WebClient.Repositories.Implements
                 dyParam.Add("p_id_dvs", OracleDbType.Varchar2, ParameterDirection.Input);
             }
 
-            dyParam.Add("p_id_nv_khoitao", OracleDbType.Varchar2, ParameterDirection.Input, handlerId);
+            dyParam.Add("p_NguoiKhoiTao", OracleDbType.Varchar2, ParameterDirection.Input, handlerId);
 
             await this.dbContext.ExecuteAsync(
                 sql: "ADMIN_QUYEN.SETDEPARTMENTS",
                 param: dyParam,
-                commandType: CommandType.StoredProcedure);
+                commandType: CommandType.StoredProcedure);*/
+            // todo: cap nhat sau
+        }
+
+        /// <summary>
+        /// Delete list permission features by id permission
+        /// </summary>
+        /// <param name="permissionId">Id of permission</param>
+        public async Task DeleteListPermissionFeaturesByIdPermission(int permissionId)
+        {
+            try
+            {
+                var query = @"UPDATE ChucNangQuyen SET DaXoa = @daXoa WHERE IdQuyen = @idQuyen";
+
+                var permission = await this.dbContext.ExecuteAsync(query, param: new
+                {
+                    daXoa = Constants.TrangThai.DaXoa,
+                    idQuyen = permissionId
+                }, commandType: System.Data.CommandType.Text);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

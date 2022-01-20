@@ -1,0 +1,305 @@
+﻿@using WebClient.Core.Models;
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedLocalizations> localizer
+@{
+    ViewData["Title"] = localizer["Trang chủ"];
+    AccountInfo account = this.ViewBag.Account;
+    IEnumerable<TrangThaiPhieu> trangThai = this.ViewBag.TrangThai;
+}
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
+        @*<div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>1</h3>
+
+                            <p>Doanh nghiệp</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-city"></i>
+                        </div>
+                        <a href="/admin/nhaxuong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>1</h3>
+
+                            <p>Quỹ đất trống</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <a href="/admin/quydattrong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>1</h3>
+
+                            <p>Nhà xưởng</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-industry"></i>
+                        </div>
+                        <a href="/admin/nhaxuong?isNhaXuong=True" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>1</h3>
+
+                            <p>Văn bản</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-file"></i>
+                        </div>
+                        <a href="/admin/vanban" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+            </div>*@
+        <!-- /.row -->
+        <!-- Main row -->
+        <div class="row">
+            <div class="col-sm-12">
+                <div id="search_panel" class="card card-default collapsed-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Tìm kiếm</h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-horizontal">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 col-form-label">Từ ngày</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group date" data-target-input="nearest">
+                                                <input type="text" id="TuNgay" name="TuNgay" class="form-control datetimepicker-input" data-target="#TuNgay" />
+                                                <div class="input-group-append" data-target="#TuNgay" data-toggle="datetimepicker">
+                                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 col-form-label">Đến ngày</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group date" data-target-input="nearest">
+                                                <input type="text" id="DenNgay" name="DenNgay" class="form-control datetimepicker-input" data-target="#DenNgay" />
+                                                <div class="input-group-append" data-target="#DenNgay" data-toggle="datetimepicker">
+                                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 col-form-label">Trạng thái</label>
+                                        <div class="col-sm-8">
+                                            <select type="number" class="form-control" name="TrangThai">
+                                                <option value="0">--Tất cả--</option>
+                                                @{
+                                                    foreach (var i in trangThai)
+                                                    {
+                                                        <option value="@i.Id">@i.Ten</option>
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button id="btn-search" type="button" class="float-right btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách</h3>
+                        <div class="float-right card-tools">
+                            <a id="btn-add-duan" href="/baohong/chitiet" class="btn btn-success btn-sm">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <table id="tbl-baohong" class="table table-bordered table-hover">
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.row (main row) -->
+    </div><!-- /.container-fluid -->
+</section>
+@section Scripts {
+    <script>
+        $(function () {
+            var tablePanel = function () {
+                var $panel = $("#tbl-baohong");
+                var datatable;
+
+                function init() {
+                    registerEvent();
+                    reload();
+                }
+
+                function registerEvent(){}
+
+                function loadDatatable() {
+                    $.ajax({
+                        url: "/baohong/search",
+                        method: "POST",
+                        data: searchPanel.get(),
+                        dataType: "JSON",
+                        success: function (data) {
+                            datatable = $panel.DataTable({
+                                @*dom: "Bfrtip",
+                                buttons: [{
+                                    extend: 'collection',
+                                    className: "btn-primary",
+                                    text: 'Xuất báo cáo',
+                                    buttons:
+                                        [{
+                                            extend: "pdf", className: "datatable-btn-export-pdf"
+                                        },
+                                        {
+                                            extend: "excel", className: "datatable-btn-export-excel"
+                                        },
+                                        {
+                                            extend: "print", className: "datatable-btn-print"
+                                        },
+                                        {
+                                            extend: "copy", className: "datatable-btn-copy"
+                                        }
+                                        ],
+                                }],*@
+                                "searching": false,
+                                "oLanguage": DataTable.language,
+                                "data": data,
+                                "columns": [
+                                    {
+                                        "title": "STT",
+                                        "data": null,
+                                        "className": "text-center",
+                                        "render": function (data, type, full, meta) {
+                                            return meta.settings._iDisplayStart + meta.row + 1 || "";
+                                        }
+                                    },
+                                    {
+                                        "title": "Dịch vụ",
+                                        "data": "dichVu"
+                                    },
+                                    {
+                                        "title": "Ngày tạo",
+                                        "data": "ngayKhoiTao",
+                                        "render": function (data, type, full, meta) {
+                                            return dateTimeHelper.dateToString(full.ngayKhoiTao);
+                                        }
+                                    },
+                                    {
+                                        "title": "Trạng thái",
+                                        "data": "trangThai"
+                                    },
+                                    {
+                                        "title": "Đánh giá",
+                                        "data": "diemDanhGia"
+                                    },
+                                    {
+                                        "title": "Chi tiết",
+                                        "data": "id",
+                                        "className": "text-center",
+                                        "render": function (data, type, full, meta) {
+                                            return '<div style="width: 80px"><a class="btn btn-success btn-sm" href="/baohong/chitiet?id=' + data + '"><i class="fas fa-eye"></i> Chi tiết</a></div>';
+                                        }
+                                    }
+                                ]
+                            });
+                        },
+                        error: function (data) {
+                            alert("Error whole fetching Data");
+                        }
+                    });
+                }
+
+                function reload() {
+                    if ($.fn.DataTable.isDataTable('#tbl-baohong')) {
+                        datatable.destroy();
+                        $panel.empty();
+                    }
+                    loadDatatable();
+                }
+
+                var publicInterfaces = {
+                    init: init,
+                    reload: reload
+                };
+
+                return publicInterfaces;
+            }();
+
+            var searchPanel = function () {
+                var $panel = $("#search_panel");
+
+                function get() {
+                    var data = {};
+                    let $inpts = $panel.find("[name]");
+                    for (let i = 0; i < $inpts.length; i++) {
+                        let $ip = $inpts.eq(i);
+                        let key = $ip.attr("name");
+                        if (key) {
+                            data[key] = $ip.val();
+                        }
+                    }
+
+                    return data;
+                }
+
+                function init() {
+                    $panel.find("#btn-search").click(function () {
+                        tablePanel.reload();
+                    });
+
+                    registerEvent();
+                }
+
+                function registerEvent() {
+
+                }
+
+                var publicInterfaces = {
+                    get: get,
+                    init: init
+                }
+
+                return publicInterfaces;
+            }();
+
+            searchPanel.init();
+            tablePanel.init();
+        });
+    </script>
+}

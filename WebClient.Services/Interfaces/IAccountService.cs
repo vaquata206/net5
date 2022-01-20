@@ -12,7 +12,7 @@ namespace WebClient.Services.Interfaces
     public interface IAccountService
     {
         Task<AccountInfo> LoginAsync(LoginVM viewModel);
-        
+
         /// <summary>
         /// Change user's password
         /// </summary>
@@ -22,11 +22,18 @@ namespace WebClient.Services.Interfaces
         Task<bool> ChangePasswordAsync(int userId, ChangePasswordVM changePasswordVM);
 
         /// <summary>
-        /// Gets employee's accounts
+        /// Send email reset password
         /// </summary>
-        /// <param name="id">Employee id</param>
-        /// <returns>List account</returns>
-        Task<IEnumerable<Account>> GetAccountsByEmployeeId(int id);
+        /// <param name="email">email reset</param>
+        /// <returns></returns>
+        Task SendEmailResetPassword(string email);
+
+        /// <summary>
+        /// Lay danh sach tai khoan theo id nhan vien
+        /// </summary>
+        /// <param name="id">id nhan vien</param>
+        /// <returns>Danh sach tai khoan</returns>
+        Task<IEnumerable<Account>> LayDsTaiKhoanTheoIdNhanVien(int id);
         Task<Account> GetByUsername(string userName);
 
         /// <summary>
@@ -52,7 +59,6 @@ namespace WebClient.Services.Interfaces
         /// <param name="userId">currebt user</param>
         /// <returns></returns>
         Task<string> ResetPassword(int accountId, int userId);
-
 
         /// <summary>
         /// Gets accounts with tree node format

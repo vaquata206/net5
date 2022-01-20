@@ -22,7 +22,8 @@ namespace WebClient.Services.Implements
 
         public async Task<AccountInfo> LoginAsync(LoginVM viewModel)
         {
-            return await this.unitOfWork.AccountRepository.LoginAsync(viewModel.Username, viewModel.Password);
+            var response = await this.unitOfWork.AccountRepository.LoginAsync(viewModel.Username, viewModel.Password);
+            return response;
         }
 
         /// <summary>
@@ -34,21 +35,64 @@ namespace WebClient.Services.Implements
         public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordVM changePasswordVM)
         {
             var account = await this.unitOfWork.AccountRepository.GetByIdAsync(userId);
-            return await this.unitOfWork.AccountRepository.ChangePasswordAsync(
-                account.UserName, 
-                account.Id_NguoiDung, 
-                changePasswordVM.MatKhauCu, 
-                changePasswordVM.MatKhauMoi);
+            if (Common.ComputeSha256Hash(changePasswordVM.MatKhauCu) == account.MatKhau)
+            {
+                account.MatKhau = Common.ComputeSha256Hash(changePasswordVM.MatKhauMoi);
+
+                await this.unitOfWork.AccountRepository.UpdateAsync(account);
+                this.unitOfWork.Commit();
+                return true;
+            }
+            else { 
+                return false;
+            }
         }
 
         /// <summary>
-        /// Gets employee's accounts
+        /// Send email reser password
         /// </summary>
-        /// <param name="id">Employee id</param>
-        /// <returns>List account</returns>
-        public async Task<IEnumerable<Account>> GetAccountsByEmployeeId(int id)
+        /// <param name="email">email reset</param>
+        /// <param name="sqlConnection">sqlConnection</param>
+        /// <param name="dbTransaction">IDbTransaction</param>
+        /// <returns></returns>
+        public async Task SendEmailResetPassword(string email)
         {
-            return await this.unitOfWork.AccountRepository.GetAccountsByEmployeeId(id);
+            var user = await this.unitOfWork.AccountRepository.GetAccountByEmail(email);
+            if (user == null)
+            {
+                throw new Exception("Email không tồn tại trong hệ thống!");
+            }
+            var title = Constants.ResetPassword.TitleEmail;
+            string dauVaCuoiMail = System.IO.File.ReadAllText(@"./wwwroot/templates/DauVaCuoiMail.html");
+            string noiDungGoiDoiTac = dauVaCuoiMail.Replace("{{NOIDUNG}}", 
+                System.IO.File.ReadAllText(@"./wwwroot/templates/Mail_ResetPassword.html"));
+
+            var hostMail = Constants.EmailHeThong.HostMail;
+            var portMail = Constants.EmailHeThong.PortMail;
+            var username = Constants.EmailHeThong.Username;
+            var password = Constants.EmailHeThong.Password;
+
+            var resetPassword = Common.GenerateResetPassword();
+            DateTime now = DateTime.Now;
+            var account = await this.unitOfWork.AccountRepository.GetByIdAsync(user.Id);
+            var matKhauMoi = Common.ComputeSha256Hash(resetPassword);
+            account.MatKhau = matKhauMoi;
+
+            await this.unitOfWork.AccountRepository.UpdateAsync(account);
+            var bodyMail = noiDungGoiDoiTac.Replace("{{HOTEN}}", user.HoTen)
+                                    .Replace("{{TENTAIKHOAN}}", user.TenTaiKhoan)
+                                    .Replace("{{MATKHAU}}", resetPassword);
+            Common.SendMail(email, title, bodyMail, hostMail, portMail, username, password);
+        }
+
+        /// <summary>
+        /// Lay danh sach tai khoan theo id nhan vien
+        /// </summary>
+        /// <param name="id">id nhan vien</param>
+        /// <returns>Danh sach tai khoan</returns>
+        public async Task<IEnumerable<Account>> LayDsTaiKhoanTheoIdNhanVien(int id)
+        {
+            return await this.unitOfWork.AccountRepository.LayDsTaiKhoanTheoIdNhanVien(id);
         }
 
         public async Task<Account> GetByUsername(string userName)
@@ -66,15 +110,10 @@ namespace WebClient.Services.Implements
         {
             var account = new Account
             {
-                Id_NhanVien = accountVM.Id_NhanVien,
-                UserName = accountVM.UserName,
+                TenTaiKhoan = accountVM.UserName.ToLower(),
                 MatKhau = Common.ComputeSha256Hash(accountVM.MatKhau),
-                Id_NV_KhoiTao = userId,
-                Ngay_KhoiTao = DateTime.Now,
-                Ma_NguoiDung = "user" + DateTime.Now.ToString("yyyyMMddHHmmss"),
-                Tinh_Trang = Constants.States.Actived.GetHashCode(),
-                Quan_Tri = 0,
-                Id_VaiTro = 3,
+                IdNhanVien = accountVM.IdNhanVien,
+                DaXoa = Constants.TrangThai.ChuaXoa,
             };
 
             await this.unitOfWork.AccountRepository.AddAsync(account);
@@ -90,14 +129,7 @@ namespace WebClient.Services.Implements
         public async Task<Account> DeleteAccountAsync(int accountId, int userId)
         {
             var account = await this.unitOfWork.AccountRepository.GetByIdAsync(accountId, true);
-            if (account.Quan_Tri == Constants.States.Actived.GetHashCode())
-            {
-                throw new Exception("Tài khoản này không được xóa");
-            }
-
-            account.Tinh_Trang = Constants.States.Disabed.GetHashCode();
-            account.Ngay_CapNhat = DateTime.Now;
-            account.Id_NV_CapNhat = userId;
+            account.DaXoa = Constants.TrangThai.DaXoa;
 
             await this.unitOfWork.AccountRepository.UpdateAsync(account);
             this.unitOfWork.Commit();
@@ -117,10 +149,6 @@ namespace WebClient.Services.Implements
             var currAccount = await this.unitOfWork.AccountRepository.GetByIdAsync(accountId);
             var password = CreatePassword(6);
             currAccount.MatKhau = Common.ComputeSha256Hash(password);
-            currAccount.Ngay_DoiMatKhau = now;
-            currAccount.SoLan_LoginSai = 0;
-            currAccount.Id_NV_CapNhat = userId;
-            currAccount.Ngay_CapNhat = now;
 
             await this.unitOfWork.AccountRepository.UpdateAsync(currAccount);
             this.unitOfWork.Commit();
@@ -151,7 +179,7 @@ namespace WebClient.Services.Implements
         /// <returns>Tree nodes</returns>
         public async Task<IEnumerable<TreeNode>> GetTreeNodeAccounts(int employeeId)
         {
-            var accounts = await this.unitOfWork.AccountRepository.GetAccountsByEmployeeId(employeeId);
+            var accounts = await this.unitOfWork.AccountRepository.LayDsTaiKhoanTheoIdNhanVien(employeeId);
             if (accounts == null)
             {
                 return null;
@@ -160,8 +188,8 @@ namespace WebClient.Services.Implements
             return accounts.Select(x => new TreeNode
             {
                 Children = false,
-                Id = "A" + x.Id_NguoiDung,
-                Text = x.UserName,
+                Id = "A" + x.Id,
+                Text = x.TenTaiKhoan,
                 TypeNode = "Account"
             });
         }

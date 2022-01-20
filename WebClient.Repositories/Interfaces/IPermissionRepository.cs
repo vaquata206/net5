@@ -13,18 +13,17 @@ namespace WebClient.Repositories.Interfaces
         Task<IEnumerable<Permission>> GetPermissions();
 
         /// <summary>
-        /// Delete list permission features by id permission and update permission with tinh_trang = 0 by id of permission
-        /// </summary>
-        /// <param name="permissionId">id of permission</param>
-        /// <returns>no reuturn</returns>
-        Task DeleteAsync(int permissionId);
-
-        /// <summary>
         /// Sets departments that the account is avaiabled work
         /// </summary>
         /// <param name="accountId">Account id</param>
         /// <param name="departmentIds">Department ids</param>
         /// <param name="handlerId">Id of user who is performing this action</param>
         Task SetDepartmentsAsync(int accountId, int[] departmentIds, int handlerId);
+
+        /// <summary>
+        /// Delete list permission features by id permission
+        /// </summary>
+        /// <param name="permissionId">Id of permission</param>
+        Task DeleteListPermissionFeaturesByIdPermission(int permissionId);
     }
 }

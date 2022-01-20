@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using WebApp.ViewModels;
 using WebClient.Contexts;
+using WebClient.Core.ViewModels;
 using WebClient.Services.Interfaces;
 
 namespace WebClient.Controllers
@@ -12,32 +11,43 @@ namespace WebClient.Controllers
     [Authorize]
     public class HomeController : BaseController
     {
-        private readonly IDangKyTiemVaccineService dangKyTiemVaccineService;
+        private readonly IBaoHongService baoHongService;
 
         /// <summary>
         /// Hom controller
         /// </summary>
-        /// <param name="dangKyTiemVaccineService">Dang ky tiem service</param>
+        /// <param name="baoHongService">Bao hong service</param>
         /// <param name="logger">logger</param>
         /// <param name="contextFactory">Context factory</param>
         public HomeController(
-            IDangKyTiemVaccineService dangKyTiemVaccineService,
-            ILogger<HomeController> logger, 
-            IContextFactory contextFactory) : base (contextFactory, logger)
+            IBaoHongService baoHongService,
+            ILogger<HomeController> logger,
+            IContextFactory contextFactory) : base(contextFactory, logger)
         {
-            this.dangKyTiemVaccineService = dangKyTiemVaccineService;
+            this.baoHongService = baoHongService;
         }
 
-        public async Task<IActionResult> Index()
+        /// <summary>
+        /// Home page
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult Index()
         {
-            var thongKe = await this.dangKyTiemVaccineService.ThongKeTongQuatSoLuong(this.BaseContext.Account.DepartmentId);
-            return View(thongKe);
+            if (this.BaseContext.Account.IsKhachHang)
+            {
+                return Redirect("/baohong");
+            }
+            else
+            {
+                return Redirect("/home/quantri");
+            }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        public async Task<IActionResult> QuanTri()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var trangThai = await this.baoHongService.GetTrangThai();
+            this.ViewBag.TrangThai = trangThai;
+            return View();
         }
     }
 }

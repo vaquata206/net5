@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebClient.Core.Entities;
+using WebClient.Core.Helpers;
 using WebClient.Repositories;
 using WebClient.Services.Interfaces;
 
@@ -29,13 +30,14 @@ namespace WebClient.Services.Implements
             var oldFeatures = await this.unitOfWork.PermissionFeatureRepository.GetListsByPermissionIdAsync(permissionId);
 
             var currentDate = DateTime.Now;
-            var newFeatures = featureIds.Where(x => oldFeatures.All(y => y.Id_ChucNang != x)).Select(x => new Permission_Feature {
-                Id_ChucNang = x,
-                Id_Quyen = permissionId,
-                Ngay_KhoiTao = currentDate,
-                Id_NV_KhoiTao = idNhanVien
+            var newFeatures = featureIds.Where(x => oldFeatures.All(y => y.IdChucNang != x)).Select(x => new ChucNangQuyen {
+                IdChucNang = x,
+                IdQuyen = permissionId,
+                DaXoa = Constants.TrangThai.ChuaXoa,
+                NgayKhoiTao = currentDate,
+                NguoiKhoiTao = idNhanVien
             });
-            var removedFeatures = oldFeatures.Where(x => featureIds.All(y => y != x.Id_ChucNang));
+            var removedFeatures = oldFeatures.Where(x => featureIds.All(y => y != x.IdChucNang));
 
             foreach(var i in removedFeatures)
             {
@@ -55,7 +57,7 @@ namespace WebClient.Services.Implements
         /// </summary>
         /// <param name="permissionId">id of permission</param>
         /// <returns>list of permission features</returns>
-        public async Task<IEnumerable<Permission_Feature>> GetPermissionFeaturesByPermissionId(int permissionId)
+        public async Task<IEnumerable<ChucNangQuyen>> GetPermissionFeaturesByPermissionId(int permissionId)
         {
             return await this.unitOfWork.PermissionFeatureRepository.GetListsByPermissionIdAsync(permissionId);
         }

@@ -10,6 +10,7 @@ namespace WebClient.Controllers
     /// <summary>
     /// Base controller
     /// </summary>
+    ///
     public abstract class BaseController : Controller
     {
         /// <summary>

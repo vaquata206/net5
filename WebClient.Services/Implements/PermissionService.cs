@@ -11,31 +11,34 @@ namespace WebClient.Services.Implements
 {
     public class PermissionService : IPermissionService
     {
+        private DateTime now;
         private readonly IUnitOfWork unitOfWork;
         public PermissionService(IUnitOfWork unitOfWork)
         {
             this.unitOfWork = unitOfWork;
+            now = DateTime.Now;
         }
 
         /// <summary>
         /// Add a permission
         /// </summary>
         /// <param name="permissionVM">The permission</param>
+        /// <param name="userId">User id</param>
         /// <returns>A Permission</returns>
-        public async Task<Permission> SaveAsync(PermissionVM permissionVM)
+        public async Task<Permission> SaveAsync(PermissionVM permissionVM, int userId)
         {
             Permission permission;
-            if (permissionVM.Id_Quyen.HasValue && permissionVM.Id_Quyen.Value != 0)
+            if (permissionVM.Id.HasValue && permissionVM.Id.Value != 0)
             {
                 // edit
-                permission = await this.unitOfWork.PermissionRepository.GetByIdAsync(permissionVM.Id_Quyen.Value);
+                permission = await this.unitOfWork.PermissionRepository.GetByIdAsync(permissionVM.Id.Value);
                 if (permission == null)
                 {
                     throw new Exception("Quyền này không tồn tại");
                 }
 
-                permission.Ten_Quyen = permissionVM.Ten_Quyen;
-                permission.Ghi_Chu = permissionVM.Ghi_Chu;
+                permission.TenQuyen = permissionVM.TenQuyen;
+                permission.DaXoa = Constants.TrangThai.ChuaXoa;
 
                 await this.unitOfWork.PermissionRepository.UpdateAsync(permission);
             }
@@ -44,10 +47,8 @@ namespace WebClient.Services.Implements
                 // add
                 permission = new Permission
                 {
-                    Ma_Quyen = "MQ" + string.Format("{0:yyyyMMddhhmmss}", DateTime.Now),
-                    Ghi_Chu = permissionVM.Ghi_Chu,
-                    Ten_Quyen = permissionVM.Ten_Quyen,
-                    Tinh_Trang = Constants.States.Actived.GetHashCode()
+                    TenQuyen = permissionVM.TenQuyen,
+                    DaXoa = Constants.TrangThai.ChuaXoa,
                 };
 
                 await this.unitOfWork.PermissionRepository.AddAsync(permission);
@@ -80,10 +81,18 @@ namespace WebClient.Services.Implements
         /// Delete a permission
         /// </summary>
         /// <param name="permissionId">Id of permission</param>
+        /// <param name="userId">User id</param>
         /// <returns>A task</returns>
-        public async Task DeleteAsync(int permissionId)
+        public async Task DeleteAsync(int permissionId, int userId)
         {
-            await this.unitOfWork.PermissionRepository.DeleteAsync(permissionId);
+            // update permission with DaXoa = 1 by id of permission
+            var permission = await this.unitOfWork.PermissionRepository.GetByIdAsync(permissionId, true);
+            permission.DaXoa = Constants.TrangThai.DaXoa;
+            await this.unitOfWork.PermissionRepository.UpdateAsync(permission);
+
+            // update list permission features with DaXoa = 1 by id permission
+            await this.unitOfWork.PermissionRepository.DeleteListPermissionFeaturesByIdPermission(permissionId);
+
             this.unitOfWork.Commit();
         }
 
@@ -96,10 +105,10 @@ namespace WebClient.Services.Implements
         public async Task SetDepartmentsAsync(int accountId, int[] departmentIds, int handlerId)
         {
             var account = await this.unitOfWork.AccountRepository.GetByIdAsync(accountId);
-            if (account.Quan_Tri == Constants.States.Actived.GetHashCode())
-            {
-                throw new Exception("Không thể thay đổi với tài khoản này");
-            }
+            //if (account.Quan_Tri == Constants.States.Actived.GetHashCode())
+            //{
+            //    throw new Exception("Không thể thay đổi với tài khoản này");
+            //}
 
             await this.unitOfWork.PermissionRepository.SetDepartmentsAsync(accountId, departmentIds, handlerId);
             this.unitOfWork.Commit();

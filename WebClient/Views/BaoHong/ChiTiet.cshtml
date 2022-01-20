@@ -1,0 +1,269 @@
+﻿@using WebClient.Core.Helpers
+@using System.Globalization;
+@model WebClient.Core.Entities.PhieuBaoHong;
+@{
+    var isNew = Model.Id == 0;
+    ViewData["Title"] = "Báo hỏng";
+    IEnumerable<DichVu> dichVu = this.ViewBag.DichVu;
+    DichVuKhachHang dvkh = this.ViewBag.DichVuKhachHang;
+    AccountInfo account = this.ViewBag.Account;
+    IEnumerable<NhanVien> nvKyThuat = this.ViewBag.NVKyThuat;
+    IEnumerable<ChiTietPhieuBaoHong> ChiTiet = ViewBag.ChiTiet;
+}
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin Báo hỏng</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-save" class="form-horizontal" validate="true" show-loader="true" method="post" action="/baohong/save">
+                            <input type="hidden" value="@Model.Id" name="id"/>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="form-group row">
+                                        <label class="col-sm-4 col-form-label">Dịch vụ</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-control" name="IdDichVu" required>
+                                                @{
+                                                    foreach (var i in dichVu)
+                                                    {
+                                                        if (dvkh.IdDichVu == i.Id)
+                                                        {
+                                                            <option value="@i.Id" selected>@i.Ten</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@i.Id">@i.Ten</option>
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                @{
+                                    if (Model.Id > 0)
+                                    {
+                                        <div class="col-sm-6">
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Trạng thái</label>
+                                                <div class="col-sm-8">
+                                                    @{
+                                                        switch (Model.IdTrangThaiPhieu)
+                                                        {
+                                                            case 1: <span>Phiếu đã gửi</span>
+                                                                break;
+                                                            case 2:<span>Phiếu đã tiếp nhận</span>
+                                                                break;
+                                                            case 3:<span>Phiếu giao kỹ thuật</span>
+                                                                break;
+                                                            case 4:<span>Phiếu hoàn thành</span>
+                                                                break;
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    }
+                                }
+                                <div class="col-sm-12">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 col-form-label">Mô tả</label>
+                                        <div class="col-sm-10">
+                                            <textarea class="form-control" name="MoTa" maxlength="200">@Model.MoTa</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                @{
+                                    if (!account.IsKhachHang && Model.IdTrangThaiPhieu >= 2)
+                                    {
+                                        var ctKyThuat = ChiTiet.LastOrDefault(x => x.IdTrangThaiPhieu == 3) ?? new ChiTietPhieuBaoHong();
+                                        <div class="col-sm-6">
+                                            <div class="form-group row">
+                                                <label class="col-sm-4 col-form-label">Nhân viên xử lý</label>
+                                                <div class="col-sm-8">
+                                                    <select class="form-control" name="IdNVKyThuat" required>
+                                                        @{
+                                                            foreach (var i in nvKyThuat)
+                                                            {
+                                                                if (ctKyThuat.IdNhanVien == i.Id)
+                                                                {
+                                                                    <option value="@i.Id" selected>@i.HoTen</option>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <option value="@i.Id">@i.HoTen</option>
+                                                                }
+                                                            }
+                                                        }
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <a href="/baohong" class="btn btn-default">
+                                    <i class="fas fa-arrow-left"></i>
+                                    Quay về
+                                </a>
+                            </div>
+                            <div class="col-sm-6">
+                                @{
+                                    if (Model.Id > 0)
+                                    {
+                                        <button id="btn-delete" type="button" class="btn btn-danger ml-2 float-right">
+                                            <i class="fas fa-times"></i>
+                                            Xóa
+                                        </button>
+                                        <form id="form-delete" action="/khachhang/delete" method="post" style="display: none !important">
+                                            <input name="Id" hidden value="@Model.Id" />
+                                        </form>
+                                    }
+                                }
+                                @{
+                                    if (account.IsKhachHang && Model.IdTrangThaiPhieu < 2)
+                                    {
+                                        <button id="btn-save" type="button" class="btn btn-primary float-right">
+                                            <i class="far fa-save"></i>
+                                            Lưu
+                                        </button>
+                                    }
+                                    if (!account.IsKhachHang && account.IdVaiTro == 2 && Model.IdTrangThaiPhieu == 1)
+                                    {
+                                        <button id="btn-tiepnhan" type="button" class="btn btn-primary float-right" style="margin-right: 5px">
+                                            <i class="far fa-save"></i>
+                                            Tiếp nhận
+                                        </button>
+                                    }
+                                    if (!account.IsKhachHang && account.IdVaiTro == 2 && Model.IdTrangThaiPhieu == 2)
+                                    {
+                                        <button id="btn-chuyenkithuat" type="button" class="btn btn-primary float-right" style="margin-right: 5px">
+                                            <i class="far fa-save"></i>
+                                            Chuyển kĩ thuật
+                                        </button>
+                                    }
+                                    if (!account.IsKhachHang && account.IdVaiTro == 1)
+                                    {
+                                        <button id="btn-hoanthanh" type="button" class="btn btn-primary float-right" style="margin-right: 5px">
+                                            <i class="far fa-save"></i>
+                                            Hoàn thành
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section Scripts{
+    <script>
+        $(function () {
+            var detailPanel = function () {
+                $formKhachHang = $("#form-save");
+                function init() {
+                    registerEvents();
+                }
+
+                function registerEvents() {
+                    $("#btn-save").click(function () {
+                        if (!$formKhachHang.valid()) {
+                            return;
+                        }
+
+                        modalHelper.showModal({
+                            title: "Lưu báo hỏng",
+                            body: "Bạn có muốn gửi yêu cầu báo hỏng này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $formKhachHang.submit();
+                            }
+                        })
+                    });
+                    $("#btn-tiepnhan").click(function () {
+                        modalHelper.showModal({
+                            title: "Tiếp nhận",
+                            body: "Bạn có muốn tiếp nhận cầu báo hỏng này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $formKhachHang.attr("action", "/baohong/tiepnhan");
+                                $formKhachHang.submit();
+                            }
+                        })
+                    });
+                    $("#btn-chuyenkithuat").click(function () {
+                        modalHelper.showModal({
+                            title: "Chuyển kĩ thuật",
+                            body: "Bạn có muốn chuyển kĩ thuật xử lý báo hỏng này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $formKhachHang.attr("action", "/baohong/chuyenkythuat");
+                                $formKhachHang.submit();
+                            }
+                        });
+                    });
+                    $("#btn-hoanthanh").click(function () {
+                        modalHelper.showModal({
+                            title: "Hoàn thành",
+                            body: "Bạn có muốn hoàn thành phiếu báo hỏng này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                showLoading();
+                                $formKhachHang.attr("action", "/baohong/hoanthanh");
+                                $formKhachHang.submit();
+                            }
+                        });
+                    });
+                    $("#btn-delete").click(function () {
+                        modalHelper.showModal({
+                            title: "Xóa báo hỏng",
+                            body: "Bạn có muốn xóa khách hàng này không?",
+                            buttons: {
+                                submit: "Đồng ý",
+                                close: "Đóng"
+                            },
+                            submit: function () {
+                                $("#form-delete").submit();
+                            }
+                        })
+                    });
+                }
+
+                var publicInterfaces = {
+                    Init: init
+                }
+
+                return publicInterfaces;
+            }();
+
+            detailPanel.Init();
+        });
+    </script>
+}

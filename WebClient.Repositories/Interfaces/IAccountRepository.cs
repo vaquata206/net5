@@ -2,20 +2,20 @@
 using System.Threading.Tasks;
 using WebClient.Core.Entities;
 using WebClient.Core.Models;
+using WebClient.Core.ViewModels;
 
 namespace WebClient.Repositories.Interfaces
 {
     public interface IAccountRepository : IBaseRepository<Account>
     {
         Task<AccountInfo> LoginAsync(string username, string password);
-        Task<bool> ChangePasswordAsync(string userName, int id_NguoiDung, string matKhauCu, string matKhauMoi);
 
         /// <summary>
-        /// Gets employee's accounts
+        /// Lay danh sach tai khoan theo id nhan vien
         /// </summary>
-        /// <param name="id">Employee id</param>
-        /// <returns>List account</returns>
-        Task<IEnumerable<Account>> GetAccountsByEmployeeId(int id);
+        /// <param name="id">id nhan vien</param>
+        /// <returns>Danh sach tai khoan</returns>
+        Task<IEnumerable<Account>> LayDsTaiKhoanTheoIdNhanVien(int id);
 
         /// <summary>
         /// get account by username
@@ -23,5 +23,24 @@ namespace WebClient.Repositories.Interfaces
         /// <param name="userName">username</param>
         /// <returns>account</returns>
         Task<Account> GetAccountByUsername(string userName);
+
+        /// <summary>
+        /// get account by email
+        /// </summary>
+        /// <param name="email">email</param>
+        /// <returns>account</returns>
+        Task<AccountInfo> GetAccountByEmail(string email);
+
+        /// <summary>
+        /// get account by idNhaDauTu
+        /// </summary>
+        /// <param name="idNhaDauTu">idNhaDauTu</param>
+        /// <returns>account</returns>
+        Task<Account> GetAccountByIdNhaDauTu(int idNhaDauTu);
+
+        /// Tim kiem danh sach tai khoan nha dau tu
+        /// </summary>
+        /// <param name="request">filter TaiKhoanNhaDauTuFilter</param>
+        /// <returns>Danh sach TaiKhoanNhaDauTuInfo</returns>
     }
 }

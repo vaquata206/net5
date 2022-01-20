@@ -172,7 +172,12 @@ var DataTable = {
         "oPaginate": {
             "sNext": ">",
             "sPrevious": "<"
-        }
+        },
+        "select": {
+            "rows": {
+                "_": "Chọn <strong>%d</strong> dòng"
+            }
+        },
     }
 };
 
@@ -282,7 +287,9 @@ var dateTimeHelper = function () {
 
     $('.datetimepicker-input').datepicker({
         format: 'dd/mm/yyyy',
-        autoclose: true
+        autoclose: true,
+        todayHighlight: true,
+        orientation: 'bottom left'
     });
 
     $('.monthpicker').datepicker({

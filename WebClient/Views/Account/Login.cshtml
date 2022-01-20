@@ -1,82 +1,72 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-    Layout = null;
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+
+@{
+    ViewData["Title"] = @localizer["Trang chủ"];
+    Layout = "_Layout.cshtml";
     string messageError = this.TempData["messageError"]?.ToString();
 }
+<style>
+    .icon-btn {
+        display: table;
+        margin: auto;
+        padding: 0px 5px 0px 0px;
+        border-radius: 50px;
+    }
+</style>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@ViewData["Title"]</title>
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <environment include="Development">
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="/node_modules/admin-lte/plugins/fontawesome-free/css/all.min.css">
-        <!-- icheck bootstrap -->
-        <link rel="stylesheet" href="/node_modules/admin-lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
-        <!-- Theme style -->
-        <link rel="stylesheet" href="/node_modules/admin-lte/dist/css/adminlte.min.css">
-    </environment>
-    <environment exclude="Development">
-        <link rel="stylesheet" href="/css/main.min.css?v=@AppSetting.ResourceVersion" />
-    </environment>
-    <link rel="stylesheet" href="/css/login.css">
-</head>
-<body>
-    <p class="title">
-    QUẢN LÝ TIÊM CHỦNG VACCINE COVID-19<br>
-    QUẬN SƠN TRÀ
-    </p>
-    <form action="/account/login" method="post" validate=true class="col-lg-3 col-md-4 col-sm-10 col-11 login">
+<div class="login-box-body">
+    <form action="/account/login?ReturnUrl=@this.ViewBag.ReturnUrl" method="post" validate=true class="col-lg-6 col-md-7 col-sm-11 col-12 authen">
         @Html.AntiForgeryToken()
-        <div class="input-group mb-3">
-            <input type="text" name="username" class="form-control" placeholder="Username" required maxlength="20">
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-envelope"></span>
-                </div>
+        <div class="col-sm-10" style="margin: auto">
+            <div class="input-group mb-3">
+                <label class="col-sm-12 col-form-label" style="text-align: center; font-size: 24px">@localizer["ĐĂNG NHẬP"]</label>
+                <label></label>
             </div>
-        </div>
-        <div class="input-group mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Password" minlength="6" required maxlength="50">
-            <div class="input-group-append">
-                <div class="input-group-text">
-                    <span class="fas fa-lock"></span>
-                </div>
+            <div class="form-group mb-3">
+                <input type="text" name="username" class="form-control" placeholder="@localizer["Tài khoản"]" required maxlength="20">
             </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-                <button type="submit" class="btn btn-primary btn-block">Đăng nhập</button>
+            <div class="form-group mb-3">
+                <input type="password" name="password" class="form-control" placeholder="@localizer["Mật khẩu"]" minlength="6" required maxlength="50">
             </div>
-        </div>
-        @{
-            if (!string.IsNullOrEmpty(messageError))
-            {
-                <div class="row">
-                    <div class="col-12">
-                        <p style="color: red;">@messageError</p>
+            @{
+                if (!string.IsNullOrEmpty(messageError))
+                {
+                    <div class="row">
+                        <div class="col-12">
+                            <p style="color: red;">@messageError</p>
+                        </div>
                     </div>
-                </div>
+                }
             }
-        }
+            <div class="row mb-3">
+                <div class="col-12">
+                    <button type="submit" class="loginButton" data-toggle="tooltip" title="@localizer["Đăng nhập"]"> @localizer["Đăng nhập"]</button>
+                    <p style="text-align: right;color: #B0B0B0; padding-top: 5px"><a href="reset-password">@localizer["Quên mật khẩu"]?</a></p>
+                </div>
+            </div>
+
+            <h6><span>@localizer["Hoặc"]</span></h6>
+            <div class="row">
+                <div class="col-12">
+                    <button type="button" class="buttonSSO">
+                        <span class="button__text">
+                            <img height="32" src="/dist/img/logoegov-sso.png" class="profile-image2" style="padding-right: 5px">
+                            Đăng nhập SSO
+                        </span>
+                    </button>
+                    <br />
+                    <p style="text-align: right;color: #B0B0B0">@localizer["Chưa có tài khoản?"] <a href="register">@localizer["Đăng ký"]</a></p>
+                </div>
+            </div>
+        </div>
+
     </form>
-    <environment include="Development">
-        <!-- jQuery -->
-        <script src="/node_modules/admin-lte/plugins/jquery/jquery.min.js"></script>
-        <!-- Bootstrap 4 -->
-        <script src="/node_modules/admin-lte/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-        <!-- AdminLTE App -->
-        <script src="/node_modules/admin-lte/dist/js/adminlte.min.js"></script>
-        <script src="/node_modules/jquery-validation/dist/jquery.validate.min.js"></script>
-    </environment>
-    <environment exclude="Development">
-        <script src="/js/main.min.js?v=@AppSetting.ResourceVersion"></script>
-    </environment>
-    <script src="/js/site.js?v=@AppSetting.ResourceVersion"></script>
-    <script src="/js/ValidateAuto.js?v=@AppSetting.ResourceVersion"></script>
-</body>
-</html>
+</div>
+
+@section Scripts {
+    <script>$(function () {
+            $(".buttonSSO").click(function (e) {
+                window.location.href = "/loginsso";
+            });
+        })</script>
+}

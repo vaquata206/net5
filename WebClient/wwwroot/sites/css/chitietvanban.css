@@ -1,0 +1,72 @@
+/*
+ CSS for VanBan of NhaDauTu
+*/
+
+div#titleView, div#tableId {
+    width: 60vw;
+    position: relative;
+    left: calc(-30vw + 50%);
+    margin-left: 20px;
+    margin-left: 20px;
+    padding-top: 20px;
+}
+
+.text-nowrap {
+    white-space: normal !important;
+}
+
+.support-center {
+    padding: 0 !important;
+    border-left: 1px dotted #d5d5d5;
+    border-bottom: 1px dotted #d5d5d5;
+    border-top: 1px dotted #d5d5d5;
+    overflow: hidden;
+    background-color: #ffffff;
+    border-radius: 4px;
+    -webkit-box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    -moz-box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    box-shadow: 10px 10px 5px 0px rgba(226, 228, 229, 1);
+    position: relative;
+    margin-bottom: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.form-group, .table {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+.link_dow {
+    display: inline;
+    margin-right: 1em;
+}
+
+b, strong {
+    font-weight: bold !important;
+}
+
+@media screen and (max-width: 880px) {
+    div#titleView, div#tableId {
+        width: 95vw;
+        position: relative;
+        left: calc(-48vw + 48%);
+        padding-top: 20px;
+    }
+
+    div#titleView {
+        margin-left: 30px;
+        margin-right: 35px;
+    }
+
+    div#tableId {
+        margin-left: 20px;
+    }
+
+}

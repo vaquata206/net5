@@ -20,6 +20,6 @@ namespace WebClient.Services.Interfaces
         /// </summary>
         /// <param name="permissionId">id of permission</param>
         /// <returns>list of permission features</returns>
-        Task<IEnumerable<Permission_Feature>> GetPermissionFeaturesByPermissionId(int permissionId);
+        Task<IEnumerable<ChucNangQuyen>> GetPermissionFeaturesByPermissionId(int permissionId);
     }
 }

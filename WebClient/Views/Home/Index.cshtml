@@ -1,24 +1,28 @@
 ﻿@using WebClient.Core.Models;
-@model WebClient.Core.ViewModels.ThongKeTongQuatVM
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedLocalizations> localizer
 @{
-    ViewData["Title"] = "Trang chủ";
+    ViewData["Title"] = localizer["Trang chủ"];
     AccountInfo account = this.ViewBag.Account;
+    var isAUP = contextFactory.GetInstance().Menu.Any(x => x.Controler == "nhadautu" && (string.IsNullOrEmpty(x.Action) || x.Action == "index"));
 }
 
 <section class="content">
     <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
         <div class="row">
             <div class="col-lg-3 col-6">
                 <!-- small box -->
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>@Model.TongSoLieuVaccine</h3>
-                        <p>Tổng số liều</p>
+                        <h3>1</h3>
+
+                        <p>Doanh nghiệp</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-social-buffer"></i>
+                        <i class="fas fa-city"></i>
                     </div>
-                    <a href="/duan" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/nhaxuong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -26,13 +30,14 @@
                 <!-- small box -->
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>@Model.TongSoNguoiDangKy</h3>
-                        <p>Tổng số người đăng ký</p>
+                        <h3>1</h3>
+
+                        <p>Quỹ đất trống</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-folder"></i>
+                        <i class="fas fa-map-marked-alt"></i>
                     </div>
-                    <a href="/quydattaidinhcu" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/quydattrong" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -40,13 +45,14 @@
                 <!-- small box -->
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>@Model.TongSoNguoiDaTiemMui1</h3>
-                        <p>Số người tiêm mũi 1</p>
+                        <h3>1</h3>
+
+                        <p>Nhà xưởng</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-android-checkbox"></i>
+                        <i class="fas fa-industry"></i>
                     </div>
-                    <a href="/duan" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/nhaxuong?isNhaXuong=True" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
@@ -54,17 +60,25 @@
                 <!-- small box -->
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>@Model.TongSoNguoiDaTiemMui2</h3>
-                        <p>Số người tiêm mũi 2</p>
+                        <h3>1</h3>
+
+                        <p>Văn bản</p>
                     </div>
                     <div class="icon">
-                        <i class="ion ion-ios-bookmarks"></i>
+                        <i class="fas fa-file"></i>
                     </div>
-                    <a href="/quydattaidinhcu" class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                    <a href="/admin/vanban" class="small-box-footer">Xem thêm <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
             </div>
             <!-- ./col -->
         </div>
         <!-- /.row -->
-    </div>
+        <!-- Main row -->
+        <div class="row">
+            <div class="col-sm-12">
+                
+            </div>
+        </div>
+        <!-- /.row (main row) -->
+    </div><!-- /.container-fluid -->
 </section>

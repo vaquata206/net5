@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Oracle.ManagedDataAccess.Client;
 using WebClient.Core.Entities;
+using WebClient.Core.Helpers;
 using WebClient.Repositories.Interfaces;
 
 namespace WebClient.Repositories.Implements
@@ -19,30 +19,30 @@ namespace WebClient.Repositories.Implements
         /// <returns>A list feature</returns>
         public async Task<IEnumerable<Feature>> GetAllAsync()
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("rsout", OracleDbType.RefCursor, ParameterDirection.Output);
+            var query = @"SELECT * FROM ChucNang WHERE DaXoa = @daXoa";
 
-            return await this.dbContext.QueryAsync<Feature>(
-                "ADMIN_FEATURE.GET_ALL", 
-                param: dyParam, 
-                commandType: CommandType.StoredProcedure);
+            var feature = await this.dbContext.QueryAsync<Feature>(query, param: new
+            {
+                daXoa = Constants.TrangThai.ChuaXoa
+            }, commandType: System.Data.CommandType.Text);
+
+            return feature;
         }
 
-        /// <summary>
-        /// Get all features of the user
-        /// </summary>
-        /// <param name="userId">Employee id</param>
-        /// <returns>A feature list</returns>
-        public async Task<IEnumerable<Feature>> GetFeaturesUser(int userId)
+        public async Task CapNhatThuTuChucNang(int idCha, int stt)
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_id_nd", OracleDbType.Int64, ParameterDirection.Input, userId);
-            dyParam.Add("rsout", OracleDbType.RefCursor, ParameterDirection.Output);
+            var query = @"UPDATE chucnang SET chucnang.thutu = chucnang.thutu - 1 WHERE 
+                            chucnang.idcha = @idCha AND chucnang.thutu > @stt AND chucnang.daxoa = 0";
 
-            return await this.dbContext.QueryAsync<Feature>(
-                sql: "ADMIN_FEATURE.GET_MENU_FEATURES", 
-                param: dyParam,
-                commandType: CommandType.StoredProcedure);
+            await this.dbContext.ExecuteAsync(
+               sql: query,
+               param: new
+               {
+                   idCha = idCha,
+                   stt = stt
+               },
+               commandType: CommandType.Text
+           );
         }
 
         /// <summary>
@@ -52,11 +52,13 @@ namespace WebClient.Repositories.Implements
         /// <returns>A Task</returns>
         public async Task DeleteFeatureAsync(int featureId)
         {
+            /*
             var query = "ADMIN_FEATURE.DELETE_FEATURE";
             var dyParam = new OracleDynamicParameters();
             dyParam.Add("P_ID_CN", OracleDbType.Int64, ParameterDirection.Input, featureId);
 
-            await this.dbContext.ExecuteAsync(sql: query, dyParam, commandType: CommandType.StoredProcedure);
+            await this.dbContext.ExecuteAsync(sql: query, dyParam, commandType: CommandType.StoredProcedure);*/
+            // todo: cap nhat sau
         }
 
         /// <summary>
@@ -66,15 +68,20 @@ namespace WebClient.Repositories.Implements
         /// <returns>list features</returns>
         public async Task<IEnumerable<Feature>> GetFeaturesOfPermissionsByAccountId(int accountId)
         {
-            var query = "ADMIN_FEATURE.FEATURE_PERMISSION_ACCOUNT";
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_id_nd", OracleDbType.Int64, ParameterDirection.Input, accountId);
-            dyParam.Add("rsout", OracleDbType.RefCursor, ParameterDirection.Output);
-
+            var sql = @"SELECT DISTINCT CN.* from ChucNang CN
+                        JOIN ChucNangQuyen CNQ ON CN.Id = CNQ.IdChucNang
+                        JOIN PhanQuyen PQ ON CNQ.IdQuyen = PQ.IdQuyen
+                        WHERE PQ.DaXoa = @daXoa AND CN.DaXoa = @daXoa and PQ.IdTaiKhoan = @acountId
+						ORDER BY ThuTu";
             return await this.dbContext.QueryAsync<Feature>(
-                query,
-                param: dyParam,
-                commandType: CommandType.StoredProcedure);
+                sql: sql,
+                param: new
+                {
+                    acountId = accountId,
+                    daXoa = Constants.TrangThai.ChuaXoa
+                },
+                commandType: CommandType.Text
+                );
         }
 
         /// <summary>
@@ -84,15 +91,19 @@ namespace WebClient.Repositories.Implements
         /// <returns>list features</returns>
         public async Task<IEnumerable<Feature>> GetFeaturesNotBelongPermissionsByAccountId(int accountId)
         {
-            var query = "ADMIN_FEATURE.FEATURE_NOTPERMISSION_ACCOUNT";
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_id_nd", OracleDbType.Int64, ParameterDirection.Input, accountId);
-            dyParam.Add("rsout", OracleDbType.RefCursor, ParameterDirection.Output);
-
+            var sql = @"SELECT DISTINCT CN.* from ChucNang CN
+                        JOIN PhanQuyen PQ ON CN.Id = PQ.IdChucNang
+                        WHERE PQ.DaXoa = @daXoa AND CN.DaXoa = @daXoa and PQ.IdTaiKhoan = @acountId
+						ORDER BY ThuTu";
             return await this.dbContext.QueryAsync<Feature>(
-                query,
-                param: dyParam,
-                commandType: CommandType.StoredProcedure);
+                sql: sql,
+                param: new
+                {
+                    acountId = accountId,
+                    daXoa = Constants.TrangThai.ChuaXoa
+                },
+                commandType: CommandType.Text
+                );
         }
     }
 }

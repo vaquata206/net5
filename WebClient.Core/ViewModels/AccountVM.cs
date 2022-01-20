@@ -13,6 +13,6 @@ namespace WebClient.Core.ViewModels
         public string MatKhau { get; set; }
 
         [Required]
-        public int Id_NhanVien { get; set; }
+        public int IdNhanVien { get; set; }
     }
 }

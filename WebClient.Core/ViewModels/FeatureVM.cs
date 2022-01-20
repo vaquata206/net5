@@ -4,25 +4,19 @@ namespace WebClient.Core.ViewModels
 {
     public class FeatureVM
     {
-        public int? ID_CN { get; set; }
-
+        public int? Id { get; set; }
         [Required]
         [MaxLength(50)]
-        public string Ten_CN { get; set; }
-
+        public string TenChucNang { get; set; }
         [MaxLength(500)]
-        public string Mota_CN { get; set; }
-
-        [MaxLength(255)]
-        public string ToolTip_CN { get; set; }
-        public int? ID_CN_PR { get; set; }
-
+        public string Mota { get; set; }
+        public int? IdCha { get; set; }
         [MaxLength(50)]
-        public string Controller_Name { get; set; }
-
+        public string ControllerName { get; set; }
         [MaxLength(50)]
-        public string Action_Name { get; set; }
-
-        public bool HienThi_Menu { get; set; }
+        public string ActionName { get; set; }
+        public string Url { get; set; }
+        public bool HienThi { get; set; }
+        public bool KichHoat { get; set; }
     }
 }

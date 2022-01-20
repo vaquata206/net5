@@ -5,7 +5,41 @@
         public enum States
         {
             Disabed = 0,
-            Actived = 1
+            Actived = 1,
+            Blocked = 2
+        }
+
+        public static class TrangThai
+        {
+            public static bool DaXoa = true;
+            public static bool ChuaXoa = false;
+        }
+
+        public static string StrongPasswordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[&;!*#@$])[0-9a-zA-Z].{5,}$";
+        public static class ResetPassword
+        {
+            public static int LengthPassword = 8;
+            public static string TitleEmail = "Khôi phục lại mật khẩu cho tài khoản tại Bản đồ số Khu Công nghệ cao Đà Nẵng";
+
+        }
+
+        public static class EmailHeThong
+        {
+            public const string Username = "bandosokcncdn@gmail.com";
+            public const string Password = "Vnpt@2020";
+            public const string HostMail = "smtp.gmail.com";
+            public const int PortMail = 587;
+        }
+
+        public enum NguoiKhoiTao
+        {
+            HeThong = 0
+        }
+
+        public enum LoaiTaiKhoan
+        {
+            NhaDauTu = 1,
+            NhanVien = 2
         }
 
         public enum ChucVu
@@ -17,66 +51,56 @@
 
         public static readonly string FormatDate = "dd/MM/yyyy";
         public static readonly string FormatDateTime = "HH:mm:ss dd/MM/yyyy";
-        
+
         public enum GioiTinh
         {
             Nam = 1,
             Nu = 2,
         }
 
-        public static class SttHangCotExcelKetQuaTiem
+        public static string[] DinhDangTaiLieu = new string[10] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".csv", ".png", ".jpg" };
+        public static string[] DinhDangHinhAnh = new string[3] { ".jpeg", ".png", ".jpg" };
+        public static string DinhDangFileKML = ".kml";
+
+        public static class DuongDanThuMuc
         {
-            public static int HoTen = 2;
-            public static int NgaySinh = 3;
-            public static int GioiTinh = 4;
-            public static int SoDienThoai = 5;
-            public static int SoTheBHYT = 6;
-            public static int DiaChi = 7;
-            public static int CMND = 8;
-            public static int NoiCongTac = 9;
-            public static int SoMuiDaTiem = 10;
-            public static int NgayTiem = 11;
-            public static int NgayNhapThongTin = 12;
+            public static string HinhAnh = "/uploads/hinhanh/";
+            public static string KML = "/uploads/kml/";
+            public static string VanBan = "/uploads/vanban/";
+            public static string BaoCaoNhaDauTu = "/assets/uploads/baocaonhadautu/";
+            public static string YeuCauBaoCao = "/assets/uploads/yeucaubaocao/";
         }
 
-        public static string[] DinhDangTaiLieu = new string[10] { ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".pdf", ".csv", ".png", ".jpg"};
-        
-        public enum TrangThaiTiem
+        public static class LoaiTaiLieu
         {
-            ChuaTiem = 0,
-            MotMui = 1,
-            HaiMui = 2
-        }
-        public static class DmTinhThanh
-        {
-            public static string Ma_Tinh = "48";
-            public static string Ten_Tinh = "Đà Nẵng";
+            public static int HinhAnh = 1;
         }
 
-        public enum TrangThai_DotTiem
+        public static class SapXepVanBan
         {
-            MoDangKy = 1,
-            DongDangKy = 0
+            public static int NgayBanHanh = 0;
+            public static int SoVanBan = 1;
         }
 
-        public static class STTHangCotExcelDSDKTiem
+        public static string LienHeLink = "https://dhpiza.danang.gov.vn/web/guest/thong-tin-lien-he";
+
+        public static class InformationFCM
         {
-            public static int STT = 0;
-            public static int Ho_Ten = 1;
-            public static int Gioi_Tinh = 2;
-            public static int Ngay_Sinh = 3;
-            public static int Email = 4;
-            public static int Nghe_Nghiep = 6;
-            public static int DonVi_CongTac = 7;
-            public static int So_DienThoai = 8;
-            public static int CMND = 9;
-            public static int SoThe_BHYT = 10;
-            public static int Ma_DoiTuong_UuTien = 5;
-            public static int Ma_DanToc = 11;
-            public static int Quoc_Tich = 12;
-            public static int Ma_DonVi = 18;
-            public static int DiaChi_HienTai = 19;
-            public static int SoMuiDKTiem = 21;
+            public static string ServerKey = "AAAAh8MJjBk:APA91bH7X7wqE3nn4p8k5eMlPKM-Wm3hShWw6BP5A1eRk4Lsx80BUkF_y0_LiN1TThmElvQKN1uG-sjV5raizhDBKHCzp1KFZOU9gcou-Ij5RvigSZybPWbk-1ULIm60FEy2B4JmPlKa";
+            public static string SenderId = "583092767769";
         }
+
+        public static class TrangThaiBaoCao
+        {
+            public static int ChuaBaoCao = 0;
+            public static int DaBaoCao = 1;
+        }
+
+        public static class PhanQuyen 
+        {
+            public static int NhaDauTu = 1002;
+        }
+
+        public static string LinkBanDoDefault = "/uploads/kml/default.kml.json";
     }
 }

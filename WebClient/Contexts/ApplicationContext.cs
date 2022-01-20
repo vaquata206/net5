@@ -68,14 +68,13 @@ namespace WebClient.Contexts
 
                     this.account = new AccountInfo
                     {
-                        UserName = GetStringValueClaim(claims, ClaimAccountType.UserName),
-                        UserId = GetIntValueClaim(claims, ClaimAccountType.UserId),
-                        UserCode = GetStringValueClaim(claims, ClaimAccountType.UserCode),
-                        EmployeeId = GetIntValueClaim(claims, ClaimAccountType.EmployeeId),
-                        EmployeeName = GetStringValueClaim(claims, ClaimAccountType.EmployeeName),
-                        DepartmentId = GetIntValueClaim(claims, ClaimAccountType.DepartmentId),
-                        DepartmentName = GetStringValueClaim(claims, ClaimAccountType.DepartmentName),
-                        PositionId = GetIntValueClaim(claims, ClaimAccountType.PositionId)
+                        TenTaiKhoan = GetStringValueClaim(claims, ClaimAccountType.UserName),
+                        Id = GetIntValueClaim(claims, ClaimAccountType.UserId),
+                        HoTen = GetStringValueClaim(claims, ClaimAccountType.FullName),
+                        IdNhanVien = GetNullableIntValueClaim(claims, ClaimAccountType.EmployeeId),
+                        IdKhachHang = GetNullableIntValueClaim(claims, ClaimAccountType.CustomerId),
+                        IsKhachHang = GetIntValueClaim(claims, ClaimAccountType.AccountType) == 0? false: true,
+                        IdVaiTro = GetNullableIntValueClaim(claims, ClaimAccountType.RoleType)
                     };
                 }
 
@@ -95,7 +94,7 @@ namespace WebClient.Contexts
                     {
                         var account = this.Account;
                         // Get features that the user can access
-                        menu = this.featureService.GetMenuAsync(account.UserId).Result;
+                        menu = this.featureService.GetMenuAsync(account);
 
                         // Store modules to session
                         this.httpContextAccessor.HttpContext.Session.SetObject(SessionExtension.SessionKeyMenu, menu);
@@ -166,14 +165,13 @@ namespace WebClient.Contexts
         {
             List<Claim> claims = new()
             {
-                new Claim(ClaimAccountType.UserName, account.UserName),
-                new Claim(ClaimAccountType.EmployeeId, account.EmployeeId.ToString()),
-                new Claim(ClaimAccountType.UserCode, account.UserCode ?? string.Empty),
-                new Claim(ClaimAccountType.UserId, account.UserId.ToString()),
-                new Claim(ClaimAccountType.DepartmentId, account.DepartmentId.ToString()),
-                new Claim(ClaimAccountType.DepartmentName, account.DepartmentName),
-                new Claim(ClaimAccountType.EmployeeName, account.EmployeeName),
-                new Claim(ClaimAccountType.PositionId, account.PositionId.ToString())
+                new Claim(ClaimAccountType.UserName, account.TenTaiKhoan),
+                new Claim(ClaimAccountType.UserId, account.Id.ToString()),
+                new Claim(ClaimAccountType.FullName, account.HoTen.ToString()),
+                new Claim(ClaimAccountType.EmployeeId, account.IdNhanVien > 0 ? account.IdNhanVien.ToString() : string.Empty),
+                new Claim(ClaimAccountType.CustomerId, account.IdKhachHang > 0 ? account.IdKhachHang.ToString() : string.Empty),
+                new Claim(ClaimAccountType.AccountType, account.IsKhachHang ? "1" : "0"),
+                new Claim(ClaimAccountType.RoleType, account.IdVaiTro > 0 ? account.IdVaiTro.ToString() : string.Empty)
             };
 
             ClaimsIdentity claimsIdentity;
@@ -216,6 +214,18 @@ namespace WebClient.Contexts
         private static int GetIntValueClaim(IEnumerable<Claim> claims, string type)
         {
             var valueString = GetStringValueClaim(claims, type);
+            _ = int.TryParse(valueString, out int valueInt);
+            return valueInt;
+        }
+
+        private static int? GetNullableIntValueClaim(IEnumerable<Claim> claims, string type)
+        {
+            var valueString = GetStringValueClaim(claims, type);
+            if (string.IsNullOrEmpty(valueString))
+            {
+                return null;
+            }
+
             _ = int.TryParse(valueString, out int valueInt);
             return valueInt;
         }

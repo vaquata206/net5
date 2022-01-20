@@ -1,7 +1,14 @@
-﻿using System;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using WebClient.Core.Entities;
 
 namespace WebClient.Core.Helpers
 {
@@ -22,6 +29,80 @@ namespace WebClient.Core.Helpers
                     builder.Append(bytes[i].ToString("x2"));
                 }
                 return builder.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Generate reset password
+        /// </summary>
+        /// <returns>password reser</returns>
+        public static string GenerateResetPassword()
+        {
+            const string LOWER_CASE = "abcdefghijklmnopqursuvwxyz";
+            const string UPPER_CAES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string NUMBERS = "123456789";
+            const string SPECIALS = @"!@£$%^&*()#€";
+            int length = Constants.ResetPassword.LengthPassword;
+
+            char[] _password = new char[length];
+            string charSet = ""; // Initialise to blank
+            System.Random _random = new Random();
+            int counter;
+
+            // Build up the character set to choose from
+            charSet += LOWER_CASE;
+
+            charSet += UPPER_CAES;
+
+            charSet += NUMBERS;
+
+            charSet += SPECIALS;
+
+            for (counter = 0; counter < length; counter++)
+            {
+                _password[counter] = charSet[_random.Next(charSet.Length - 1)];
+            }
+
+            return String.Join(null, _password);
+        }
+
+        /// <summary>
+        /// Send mail
+        /// </summary>
+        /// <param name="toMail">to mail</param>
+        /// <param name="subject">subject mail</param>
+        /// <param name="body">content mail</param>
+        /// <param name="hostMail">host mail</param>
+        /// <param name="portMail">port mail</param>
+        /// <param name="username">from mail</param>
+        /// <param name="password">password of username</param>
+        public static void SendMail(string toMail, string subject, string body, string hostMail, int portMail, string username, string password)
+        {
+            try
+            {
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress(username);
+
+                mail.To.Add(toMail);
+                mail.Subject = subject;
+                mail.Body = body;
+                mail.IsBodyHtml = true;
+
+                SmtpClient smtpServer = new SmtpClient
+                {
+                    Host = hostMail,
+                    Port = portMail,
+                    EnableSsl = true,
+                    DeliveryMethod = SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new NetworkCredential(username, password)
+                };
+
+                smtpServer.SendMailAsync(mail).Wait();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
@@ -70,6 +151,63 @@ namespace WebClient.Core.Helpers
             if (number >= 4) return "IV" + ToRoman(number - 4);
             if (number >= 1) return "I" + ToRoman(number - 1);
             throw new ArgumentOutOfRangeException("something bad happened");
+        }
+
+        public static int SaveFile(IFormFile file, string folderPath)
+        {
+            var fileName = string.Format(".{0}", folderPath);
+            using (FileStream fs = System.IO.File.Create(fileName))
+            {
+                file.CopyTo(fs);
+                fs.Flush();
+            }
+            return 1;
+        }
+
+        public static string HandlerMainKML(IFormFile fileKML, string fileKMLName)
+        {
+            if (fileKML == null)
+            {
+                return string.Empty;
+            }
+            var fileName = ContentDispositionHeaderValue.Parse(fileKML.ContentDisposition).FileName.Trim('"');
+            var extensionKML = Path.GetExtension(fileName);
+            if (!Constants.DinhDangFileKML.Equals(extensionKML.ToLower()))
+            {
+                throw new Exception(string.Format(
+                    "Định dạng file kml không hợp lệ. Hệ thống chỉ hỗ trợ định dạng: {0}",
+                    string.Join(",", Constants.DinhDangFileKML)));
+            }
+            var folderPath = string.Format("{0}{1}.kml.json", Constants.DuongDanThuMuc.KML, fileKMLName);
+            var saveFolder = "/wwwroot" + folderPath;
+            SaveFile(fileKML, saveFolder);
+            return folderPath;
+        }
+
+        public static string HandlerKML(IFormFile fileKML)
+        {
+            if (fileKML == null)
+            {
+                return string.Empty;
+            }
+            var fileName = ContentDispositionHeaderValue.Parse(fileKML.ContentDisposition).FileName.Trim('"');
+            var extensionKML = Path.GetExtension(fileName);
+            if (!Constants.DinhDangFileKML.Equals(extensionKML.ToLower()))
+            {
+                throw new Exception(string.Format(
+                    "Định dạng file kml không hợp lệ. Hệ thống chỉ hỗ trợ định dạng: {0}",
+                    string.Join(",", Constants.DinhDangFileKML)));
+            }
+            var folderPath = string.Format("{0}{1}.kml.json",Constants.DuongDanThuMuc.KML, Guid.NewGuid().ToString());
+            var saveFolder = "/wwwroot" + folderPath;
+            SaveFile(fileKML, saveFolder);
+            return folderPath;
+        }
+
+        public static bool CheckForStrongPassword(String password)
+        {
+            var regex = new Regex(Constants.StrongPasswordRegex);
+            return regex.IsMatch(password);
         }
     }
 }

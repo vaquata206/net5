@@ -1,5 +1,6 @@
 ﻿using System;
 using WebClient.Core;
+using WebClient.Core.Entities;
 using WebClient.Repositories.Implements;
 using WebClient.Repositories.Interfaces;
 
@@ -9,35 +10,27 @@ namespace WebClient.Repositories
     {
         private readonly DbContext dbContext;
         private IAccountRepository accountRepository;
-        private IDepartmentRepository departmentRepository;
+        private IDonViRepository departmentRepository;
         private IFeatureRepository featureRepository;
-        private IEmployeeRepository employeeRepository;
+        private INhanVienRepository nhanVienRepository;
         private IPermissionRepository permissionRepository;
         private IPermissionFeatureRepository permissionFeatureRepository;
         private IEmployeePermissionRepository employeePermissionRepository;
-        private IDangKyTiemVaccineRepository dangKyTiemVaccineRepository;
-        private IDotTiemVaccineRepository dotTiemVaccineRepository;
-        private ILichSuTiemVaccineRepository lichSuTiemVaccineRepository;
-        private IDmDoiTuongUuTienRepository dmDoiTuongUuTienRepository;
-        private IDmDanTocRepository dmDanTocRepository;
-
+        private IBaoHongRepository baoHongRepository;
         public UnitOfWork(AppSetting appSetting)
         {
             this.dbContext = new DbContext(appSetting.ConnectionString);
         }
 
         public IAccountRepository AccountRepository => this.accountRepository ??= new AccountRepository(dbContext);
-        public IDepartmentRepository DepartmentRepository => this.departmentRepository ??= new DepartmentRepository(dbContext);
+        public IDonViRepository DepartmentRepository => this.departmentRepository ??= new DonViRepository(dbContext);
         public IFeatureRepository FeatureRepository => this.featureRepository ??= new FeatureRepository(dbContext);
-        public IEmployeeRepository EmployeeRepository => this.employeeRepository ??= new EmployeeRepository(dbContext);
+        public INhanVienRepository NhanVienRepository => this.nhanVienRepository ??= new NhanVienRepository(dbContext);
         public IPermissionRepository PermissionRepository => this.permissionRepository ??= new PermissionRepository(dbContext);
         public IPermissionFeatureRepository PermissionFeatureRepository => this.permissionFeatureRepository ??= new PermissionFeatureRepository(dbContext);
         public IEmployeePermissionRepository EmployeePermissionRepository => this.employeePermissionRepository ??= new EmployeePermissionRepository(dbContext);
-        public IDangKyTiemVaccineRepository DangKyTiemVaccineRepository => this.dangKyTiemVaccineRepository ??= new DangKyTiemVaccineRepository(dbContext);
-        public IDotTiemVaccineRepository DotTiemVaccineRepository => this.dotTiemVaccineRepository ??= new DotTiemVaccineRepository(dbContext);
-        public ILichSuTiemVaccineRepository LichSuTiemVaccineRepository => this.lichSuTiemVaccineRepository ??= new LichSuTiemVaccineRepository(dbContext);
-        public IDmDoiTuongUuTienRepository DmDoiTuongUuTienRepository => this.dmDoiTuongUuTienRepository ??= new DmDoiTuongUuTienRepository(dbContext);
-        public IDmDanTocRepository DmDanTocRepository => this.dmDanTocRepository ??= new DmDanTocRepository(dbContext);
+        public IBaoHongRepository BaoHongRepository => this.baoHongRepository ??= new BaoHongRepository(dbContext);
+
         public void Commit()
         {
             this.dbContext.Commit();

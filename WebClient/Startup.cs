@@ -1,13 +1,18 @@
 using System;
 using System.IO;
+using System.Linq;
 using Autofac;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
 using WebClient.Contexts;
 using WebClient.Core;
 using WebClient.Extensions;
@@ -31,7 +36,8 @@ namespace WebClient
         {
             services.AddControllersWithViews().AddRazorRuntimeCompilation();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(option => {
+                .AddCookie(option =>
+                {
                     option.LoginPath = "/login";
                 });
             services.AddHttpContextAccessor();
@@ -43,7 +49,16 @@ namespace WebClient
                 options.Cookie.IsEssential = true;
             });
 
+            // Support multi languages
+            services.AddLocalization(opt => { opt.ResourcesPath = "Resources"; });
+            services.AddMvc().AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix);
 
+            // Add Swagger
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "BĐS.KCNC.Api", Version = "v1" });
+                c.ResolveConflictingActions(apiDes => apiDes.First());
+            });
 
             // Auto Mapper Configurations
             var mappingConfig = new MapperConfiguration(mc =>
@@ -53,6 +68,13 @@ namespace WebClient
 
             IMapper mapper = mappingConfig.CreateMapper();
             services.AddSingleton(mapper);
+
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
         }
 
         /// <summary>
@@ -70,17 +92,13 @@ namespace WebClient
 
             builder.RegisterType<ContextFactory>().As<IContextFactory>().InstancePerLifetimeScope();
             builder.RegisterType<AppSetting>().InstancePerLifetimeScope();
-            builder.RegisterType<EmployeeService>().As<IEmployeeService>().InstancePerLifetimeScope();
+            builder.RegisterType<NhanVienService>().As<INhanVienService>().InstancePerLifetimeScope();
             builder.RegisterType<AccountService>().As<IAccountService>().InstancePerLifetimeScope();
-            builder.RegisterType<DepartmentService>().As<IDepartmentService>().InstancePerLifetimeScope();
+            builder.RegisterType<DonViService>().As<IDonViService>().InstancePerLifetimeScope();
             builder.RegisterType<FeatureService>().As<IFeatureService>().InstancePerLifetimeScope();
             builder.RegisterType<PermissionService>().As<IPermissionService>().InstancePerLifetimeScope();
             builder.RegisterType<PermissionFeatureService>().As<IPermissionFeatureService>().InstancePerLifetimeScope();
-            builder.RegisterType<EmployeePermissionService>().As<IEmployeePermissionService>().InstancePerLifetimeScope();
-            builder.RegisterType<DangKyTiemVaccineService>().As<IDangKyTiemVaccineService>().InstancePerLifetimeScope();
-            builder.RegisterType<DotTiemVaccineService>().As<IDotTiemVaccineService>().InstancePerLifetimeScope();
-            builder.RegisterType<DanhMucService>().As<IDanhMucService>().InstancePerLifetimeScope();
-            builder.RegisterType<LichSuTiemService>().As<ILichSuTiemService>().InstancePerLifetimeScope();
+            builder.RegisterType<BaoHongService>().As<IBaoHongService>().InstancePerLifetimeScope();
 
             builder.RegisterType<UnitOfWork>().As<IUnitOfWork>().InstancePerLifetimeScope();
         }
@@ -96,8 +114,15 @@ namespace WebClient
             {
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                // app.UseHsts();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "BĐS.KCNC.Api v1");
+            });
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -106,14 +131,27 @@ namespace WebClient
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseSession();
+            // Support multi languages
+            var supportedCultures = new[] { "vi", "en" };
+            var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+            app.UseRequestLocalization(localizationOptions);
 
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(env.ContentRootPath, "Assets")),
+                RequestPath = "/assets"
+            });
+
+            app.UseSession();
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDefaultControllerRoute();
                 endpoints.MapControllerRoute(
-                    name: "default",
+                    name: "areas",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+            });           
         }
     }
 }

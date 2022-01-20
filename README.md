@@ -1,5 +1,5 @@
-# BLDA Sơn trà
-Phần mềm Ban quản lý dự án quy hoạch quận Sơn Trà - Đà Nẵng
+# BĐS Khu công nghệ cao
+Phần mềm Bản đồ số khu công nghệ cao
 ## Prerequisites
 1. Netcore 5
 2. NPM

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Oracle.ManagedDataAccess.Client;
 using WebClient.Core.Entities;
 using WebClient.Core.Helpers;
 using WebClient.Core.Models;
+using WebClient.Core.ViewModels;
 using WebClient.Repositories.Interfaces;
 
 namespace WebClient.Repositories.Implements
@@ -23,49 +23,59 @@ namespace WebClient.Repositories.Implements
         /// <returns>Access token</returns>
         public async Task<AccountInfo> LoginAsync(string username, string password)
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_username", OracleDbType.Varchar2, ParameterDirection.Input, username);
-            dyParam.Add("p_password", OracleDbType.Varchar2, ParameterDirection.Input, Common.ComputeSha256Hash(password));
-            dyParam.Add("RSOUT", OracleDbType.RefCursor, ParameterDirection.Output);
+            password = Common.ComputeSha256Hash(password);
+
+            var sql = @"SELECT * FROM TAIKHOAN WHERE TenTaiKhoan = @username AND MatKhau = @password AND DAXOA=0";
+            var account = await this.dbContext.QueryFirstOrDefaultAsync<Account>(sql: sql, param: new
+            {
+                username,
+                password
+            });
+
+            if (account == null)
+                return null;
+
+            if (account.IsKhachHang)
+            {
+                sql = @"SELECT TK.Id, TK.TenTaiKhoan, KH.HoTen, TK.IsKhachHang, TK.IdKhachHang FROM KhachHang kh
+                            JOIN TaiKhoan TK ON TK.IdKhachHang = KH.Id AND TK.IsKhachHang = 1
+                            WHERE TK.Id = @id AND TK.DaXoa = 0 AND kh.daxoa = 0";
+            }
+            else
+            {
+                sql = @"SELECT TK.Id, TK.TenTaiKhoan, nv.HoTen, TK.IsKhachHang, TK.IdNhanVien, nv.IdVaiTro FROM NhanVien nv
+                            JOIN TaiKhoan TK ON TK.IdNhanVien = nv.Id AND TK.IsKhachHang = 0
+                            WHERE TK.Id = @id AND TK.DaXoa = 0 AND nv.daxoa = 0 ";
+            }
 
             return await this.dbContext.QueryFirstOrDefaultAsync<AccountInfo>(
-                sql: "BLDT_ACCOUNT.LOGIN",
-                param: dyParam,
-                commandType: CommandType.StoredProcedure
+                sql: sql,
+                param: new
+                {
+                    account.Id
+                }
                 );
         }
 
-        public async Task<bool> ChangePasswordAsync(string userName, int id_NguoiDung, string matKhauCu, string matKhauMoi)
-        {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_username", OracleDbType.Varchar2, ParameterDirection.Input, userName);
-            dyParam.Add("p_id_nhanvien", OracleDbType.Int64, ParameterDirection.Input, id_NguoiDung);
-            dyParam.Add("p_current_password", OracleDbType.Varchar2, ParameterDirection.Input, Common.ComputeSha256Hash(matKhauCu));
-            dyParam.Add("p_new_password", OracleDbType.Varchar2, ParameterDirection.Input, Common.ComputeSha256Hash(matKhauMoi));
-            dyParam.Add("rs", OracleDbType.Int16, ParameterDirection.Output);
-            await this.dbContext.QueryFirstOrDefaultAsync<int>(
-                sql: "BLDT_ACCOUNT.ChangePassword", 
-                param: dyParam, 
-                commandType: CommandType.StoredProcedure);
-
-            var status = int.Parse(dyParam.GetByName("rs").Value.ToString());
-            return status == Constants.States.Actived.GetHashCode();
-        }
-
         /// <summary>
-        /// Gets employee's accounts
+        /// Lay danh sach tai khoan theo id nhan vien
         /// </summary>
-        /// <param name="id">Employee id</param>
-        /// <returns>List account</returns>
-        public async Task<IEnumerable<Account>> GetAccountsByEmployeeId(int id)
+        /// <param name="id">id nhan vien</param>
+        /// <returns>Danh sach tai khoan</returns>
+        public async Task<IEnumerable<Account>> LayDsTaiKhoanTheoIdNhanVien(int id)
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_employeeId", OracleDbType.Int64, ParameterDirection.Input, id);
-            dyParam.Add("rs", OracleDbType.RefCursor, ParameterDirection.Output);
+            var sql = @"SELECT * FROM TaiKhoan
+                        WHERE DaXoa = @daXoa AND IdNhanVien = @id";
+
             return await this.dbContext.QueryAsync<Account>(
-                sql: "BLDT_ACCOUNT.GETACCOUNTSBYEMPLOYEEID", 
-                dyParam, 
-                commandType: CommandType.StoredProcedure);
+                sql: sql,
+                param: new
+                {
+                    id = id,
+                    daXoa = Constants.TrangThai.ChuaXoa
+                },
+                commandType: CommandType.Text
+            );
         }
 
         /// <summary>
@@ -75,12 +85,64 @@ namespace WebClient.Repositories.Implements
         /// <returns>account</returns>
         public async Task<Account> GetAccountByUsername(string userName)
         {
-            var dyParam = new OracleDynamicParameters();
-            dyParam.Add("p_username", OracleDbType.Varchar2, ParameterDirection.Input, userName);
-            dyParam.Add("rs", OracleDbType.RefCursor, ParameterDirection.Output);
-            var query = "BLDT_ACCOUNT.GETACCOUNTBYUSERNAME";
+            var sql = @"SELECT * FROM TaiKhoan
+                        WHERE DaXoa = 0 AND TenTaiKhoan = @username";
             return await this.dbContext.QueryFirstOrDefaultAsync<Account>(
-                sql: query, param: dyParam, commandType: CommandType.StoredProcedure);
+                sql: sql,
+                param: new
+                {
+                    username = userName.ToLower()
+                },
+                commandType: CommandType.Text
+                );
+        }
+
+        /// <summary>
+        /// get account by email
+        /// </summary>
+        /// <param name="email">email</param>
+        /// <returns>account</returns>
+        public async Task<AccountInfo> GetAccountByEmail(string email)
+        {
+            var sql = string.Format(@"SELECT TK.Id, TK.TenTaiKhoan, TK.LoaiTaiKhoan,
+                        TK.IdNhaDauTu, TK.IdNhanVien, TK.TrangThai,
+                        DV.Ten AS TenDonVi, NV.IdDonVi,
+                        (Case When TK.LoaiTaiKhoan = {0} Then NDT.TenNhaDauTu
+                               When TK.LoaiTaiKhoan = {1} Then NV.HoTen END) AS HoTen
+                        FROM TaiKhoan TK
+                        LEFT JOIN NhanVien NV ON TK.IdNhanVien = NV.Id AND NV.DaXoa = 0
+                        LEFT JOIN NhaDauTu NDT ON NDT.Id = TK.IdNhaDauTu AND NDT.DaXoa = 0
+                        LEFT JOIN DONVI DV ON DV.Id = NV.IdDonVi
+                        WHERE TK.DaXoa = 0  AND ( NV.Email = @email OR NDT.Email= @email) ",
+                        Constants.LoaiTaiKhoan.NhaDauTu.GetHashCode(), Constants.LoaiTaiKhoan.NhanVien.GetHashCode());
+
+            return await this.dbContext.QueryFirstOrDefaultAsync<AccountInfo>(
+                sql: sql,
+                param: new
+                {
+                    email = email.ToLower()
+                },
+                commandType: CommandType.Text
+                );
+        }
+
+        /// <summary>
+        /// get account by idNhaDauTu
+        /// </summary>
+        /// <param name="idNhaDauTu">idNhaDauTu</param>
+        /// <returns>account</returns>
+        public async Task<Account> GetAccountByIdNhaDauTu(int idNhaDauTu)
+        {
+            var sql = @"SELECT * FROM TaiKhoan
+                        WHERE DaXoa = 0 AND IdNhaDauTu = @idNhaDauTu";
+            return await this.dbContext.QueryFirstOrDefaultAsync<Account>(
+                sql: sql,
+                param: new
+                {
+                    idNhaDauTu = idNhaDauTu
+                },
+                commandType: CommandType.Text
+                );
         }
     }
 }

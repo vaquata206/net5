@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Dapper;
-using Oracle.ManagedDataAccess.Client;
-using WebClient.Core;
 using WebClient.Core.Entities;
 using WebClient.Repositories.Interfaces;
 
 namespace WebClient.Repositories.Implements
 {
-    public class PermissionFeatureRepository : BaseRepository<Permission_Feature>, IPermissionFeatureRepository
+    public class PermissionFeatureRepository : BaseRepository<ChucNangQuyen>, IPermissionFeatureRepository
     {
         public PermissionFeatureRepository(DbContext dbContext) : base(dbContext)
         {
@@ -21,14 +17,14 @@ namespace WebClient.Repositories.Implements
         /// </summary>
         /// <param name="permission_Feature">infor permission feature</param>
         /// <returns>no reuturn</returns>
-        public async Task DeleteAsync(Permission_Feature permission_Feature)
+        public async Task DeleteAsync(ChucNangQuyen permission_Feature)
         {
-            var query = @"DELETE FROM Quyen_ChucNang WHERE Id_Quyen = :idQuyen AND Id_ChucNang = :idChucNang";
+            var query = @"DELETE FROM ChucNangQuyen WHERE IdQuyen = @idQuyen AND IdChucNang = @idChucNang";
             await this.dbContext.ExecuteAsync(query,
                 param: new
                 {
-                    idQuyen = permission_Feature.Id_Quyen,
-                    idChucNang = permission_Feature.Id_ChucNang,
+                    idQuyen = permission_Feature.IdQuyen,
+                    idChucNang = permission_Feature.IdChucNang,
                 },
                 commandType: CommandType.Text);
         }
@@ -38,10 +34,10 @@ namespace WebClient.Repositories.Implements
         /// </summary>
         /// <param name="permissionId">id of permission</param>
         /// <returns>list of permission features</returns>
-        public async Task<IEnumerable<Permission_Feature>> GetListsByPermissionIdAsync(int permissionId)
+        public async Task<IEnumerable<ChucNangQuyen>> GetListsByPermissionIdAsync(int permissionId)
         {
-            var query = @"Select * From quyen_chucnang Where Id_Quyen = :idQuyen";
-            var list = await this.dbContext.QueryAsync<Permission_Feature>(query,
+            var query = @"Select * From ChucNangQuyen Where IdQuyen = @idQuyen";
+            var list = await this.dbContext.QueryAsync<ChucNangQuyen>(query,
                     param: new
                     {
                         idQuyen = permissionId,

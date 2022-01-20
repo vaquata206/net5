@@ -1,0 +1,304 @@
+﻿.kcnc-search-box {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 2;
+}
+
+.kcnc-search-box-keywork {
+    width: 30px;
+    overflow: hidden;
+    -webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+}
+
+    .kcnc-search-box-keywork:hover, .kcnc-search-box-keywork.kcnc-show {
+        width: 400px;
+    }
+
+.kcnc-search-box .kcnc-search-form {
+    display: inline-table;
+    padding: 10px 10px 0px 10px;
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px #00000052;
+}
+
+    .kcnc-search-box .kcnc-search-form .kcnc-search-control {
+        position: relative;
+        height: 25px;
+        margin-bottom: 10px;
+    }
+
+    .kcnc-search-box .kcnc-search-form .kcnc-search-input {
+        width: 300px;
+        border: none;
+        outline: none;
+        padding-left: 30px
+    }
+
+    .kcnc-search-box .kcnc-search-form i {
+        position: absolute;
+        top: 4px;
+        left: 8px;
+    }
+
+    .kcnc-search-box .kcnc-search-form .kcnc-search-keywork {
+        width: 100%;
+    }
+
+        .kcnc-search-box .kcnc-search-form .kcnc-search-keywork:hover, .kcnc-search-box .kcnc-search-form .kcnc-search-keywork:active {
+            border: none;
+            outline: none;
+        }
+
+.kcnc-search-results {
+    overflow: auto;
+    background: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px #00000052;
+}
+
+.kcnc-search-results-box.kcnc-show {
+    display: block;
+}
+
+.kcnc-search-results-box {
+    position: absolute;
+    z-index: 2;
+    top: 72px;
+    left: 15px;
+    width: 400px;
+    display: none;
+}
+
+.kcnc-search-result-label {
+    display: block;
+}
+
+    .kcnc-search-result-label a {
+        font-weight: bold;
+    }
+
+.kcnc-search-item-image {
+    width: 135px;
+}
+
+.kcnc-search-item-box {
+    display: flex;
+}
+
+.kcnc-search-item-details {
+    flex-grow: 1;
+    padding-left: 10px;
+}
+
+.kcnc-search-item-image img {
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0px 0px 2px #00000052;
+}
+
+.kcnc-search-item-show-map {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    color: #979797;
+}
+
+    .kcnc-search-item-show-map label {
+        cursor: pointer;
+    }
+
+.kcnc-search-result-item {
+    margin-top: 10px;
+    position: relative;
+    padding-bottom: 30px;
+    border-bottom: solid #767676 1.5px;
+}
+
+    .kcnc-search-result-item:last-child {
+        border-bottom: none;
+    }
+
+.kcnc-btn-slide {
+    display: none;
+}
+
+@-webkit-keyframes kcncspin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes kcncspin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.kcnc-loader {
+    display: inline-block;
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    width: 30px;
+    height: 30px;
+    -webkit-animation: kcncspin 2s linear infinite; /* Safari */
+    animation: kcncspin 2s linear infinite;
+}
+
+.kcnc-search-result-label a {
+    display: inline-block;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden !important;
+    text-overflow: ellipsis;
+}
+
+.kcnc-btn-show-info {
+    background: #fff;
+    padding: 5px 5px 5px 5px;
+    box-shadow: 0px -1px 2px #00000052;
+    border-radius: 0 5px 0 0;
+    display: none;
+    border-top: 1px solid #00000014;
+}
+
+.kcnc-btn-search-mb {
+    display: none;
+}
+
+@media screen and (max-width: 755px) {
+    .kcnc-btn-show-info {
+        display: inline-block;
+    }
+
+    .kcnc-search-box {
+        top: 10px;
+        right: 58px;
+    }
+
+    .kcnc-search-box-keywork:hover, .kcnc-search-box-keywork:active, .kcnc-search-box-keywork:target, .kcnc-search-box-keywork.kcnc-show {
+        width: 100%;
+    }
+
+    .kcnc-search-box-keywork {
+        width: 100%;
+    }
+
+    .kcnc-search-form:not(.kcnc-search-box-keywork) {
+        display: none;
+        margin-top: 15px;
+        width: 100%;
+    }
+
+    .kcnc-search-box .kcnc-search-form .kcnc-search-input {
+        width: 100% !important;
+    }
+
+    .kcnc-search-results {
+        border-radius: 0px;
+        overflow: hidden;
+        max-height: 428px;
+        transition: all .5s;
+        padding-top: 0px;
+        display: flex;
+    }
+
+    .kcnc-search-results-box {
+        top: initial;
+        bottom: 0;
+        left: 0px;
+        right: 0px;
+        width: initial;
+        display: none;
+        overflow: hidden;
+    }
+
+    .kcnc-search-result-item {
+        padding-top: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-right: 10px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 2px #00000052;
+    }
+
+    .kcnc-search-result-label {
+        width: 77vw;
+    }
+
+    .kcnc-btn-slide {
+        position: absolute;
+        top: 30px;
+        bottom: 0;
+        width: 40px;
+        background: #00000038;
+        display: block;
+    }
+
+        .kcnc-btn-slide span {
+            z-index: 5;
+            position: absolute;
+            top: calc(50% - 30px);
+            height: 30px;
+            width: 30px;
+            border-left: 4px solid #ffffff;
+            border-top: 4px solid #ffffff;
+        }
+
+    .kcnc-btn-previous {
+        transform: rotate(-45deg);
+        left: 10px
+    }
+
+    .kcnc-btn-next {
+        transform: rotate(135deg);
+        right: 10px;
+    }
+
+    .kcnc-search-item-show-map {
+        right: 12px;
+    }
+
+    .kcnc-search-item-image {
+        display: none;
+    }
+
+    .kcnc-show-less .kcnc-search-item-details {
+        display: none;
+    }
+
+    .kcnc-search-box.kcnc-touch-search {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px 15px 15px 15px;
+        background: #f7f7f7;
+    }
+
+    .kcnc-touch-search .kcnc-search-form {
+        display: inline-table;
+    }
+
+    .kcnc-touch-search .kcnc-btn-search-mb {
+        display: block;
+    }
+
+    .kcnc-search-item-details {
+        padding-left: 0px;
+    }
+}
